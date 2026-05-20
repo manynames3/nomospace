@@ -1,10 +1,20 @@
 # nomospace
 
-nomospace is a native Mac Storage Auditor for people whose Mac is full but Apple Storage, CleanMyMac, CCleaner, or generic disk tools did not explain the real cause.
+**nomospace is a native Mac Storage Auditor for people whose Mac is full but Apple Storage, CleanMyMac, CCleaner, or generic disk tools did not explain the real cause.**
 
 It finds hidden app-generated storage, explains what created it, labels cleanup risk, and lets users choose what to move to Trash.
 
 > Your Mac is full. nomospace shows exactly why.
+
+**Live landing page:** [nomospace.pages.dev](https://nomospace.pages.dev)  
+**Status:** beta-ready demo, not notarized for public paid distribution yet  
+**Platform:** macOS 14+, SwiftUI, local-first
+
+![nomospace storage audit preview](landing/assets/nomospace-report-preview.png)
+
+## Product promise
+
+Apple Storage can show that `System Data` is huge, but it rarely tells users what caused it or what is safe to remove. nomospace turns hidden Library folders, app caches, and developer artifacts into plain-English findings with risk labels and Trash-first cleanup.
 
 ## Who it is for
 
@@ -30,6 +40,26 @@ It finds hidden app-generated storage, explains what created it, labels cleanup 
 - It does not permanently delete files. Users empty Trash later if they are comfortable.
 - It does not remove protected personal folders automatically.
 - It is not antivirus, a duplicate finder, a RAM booster, or a broad app uninstaller.
+
+## Repository map
+
+```text
+Sources/nomospace/        Native SwiftUI macOS app
+Sources/nomospace/Resources/Rules/storage-rules.json
+                           Bundled hidden-storage rule library
+Packaging/                Info.plist and app icon
+landing/                  Static sales page deployed to Cloudflare Pages
+scripts/                  App packaging, smoke tests, and generated assets
+docs/                     Product scope and sellable-MVP notes
+```
+
+## Key workflows
+
+- **Audit:** scan known high-signal storage locations and large first-level folders.
+- **Explain:** show size, exact path, category, risk, cause, and side effect.
+- **Select:** auto-select only `Safe` and `Usually Safe` findings.
+- **Clean:** move selected items to macOS Trash first.
+- **Report:** export a local Markdown audit report for support or before/after proof.
 
 ## Run locally
 
@@ -69,6 +99,8 @@ The smoke test builds the app, validates packaging metadata, validates the bundl
 
 The static sales page lives in `landing/` and is deployed to Cloudflare Pages.
 
+Live production URL: [https://nomospace.pages.dev](https://nomospace.pages.dev)
+
 ```sh
 cd nomospace
 swift scripts/make-landing-assets.swift
@@ -107,6 +139,19 @@ The strongest first customer niche is Mac photographers, creators, and developer
 - Default to moving items to Trash.
 - Never auto-select personal files, browser profiles, cloud folders, or risky app data.
 - Every finding should answer: what is this, why is it big, and what happens if I remove it?
+
+## Verification checklist
+
+Before demoing or shipping a build:
+
+```sh
+scripts/test.sh
+scripts/package-app.sh
+codesign --verify --deep --strict .build/release/nomospace.app
+.build/release/nomospace.app/Contents/MacOS/nomospace --self-test
+```
+
+The self-test confirms that the bundled cleanup rule library is available at runtime.
 
 ## Privacy
 
