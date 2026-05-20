@@ -18,6 +18,7 @@ test -x scripts/package-download.sh
 grep -q "Download evaluation build" landing/index.html
 grep -q "Request access code" landing/index.html
 grep -q "nomospace-evaluation-mode.png" landing/index.html
+grep -q "rule-matrix" landing/index.html
 grep -q "nomospace" landing/index.html
 
 grep -q '"id": "apple-aerial-wallpaper-videos"' Sources/nomospace/Resources/Rules/storage-rules.json

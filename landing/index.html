@@ -118,25 +118,51 @@
         <div class="section-inner product-layout">
           <div>
             <p class="eyebrow">Rule library</p>
-            <h2>Built around the storage folders people are afraid to touch.</h2>
+            <h2>The value is in the cleanup decision, not another storage chart.</h2>
             <p class="body-copy">
-              The beta rule library focuses on high-pain Mac storage patterns: Apple system bloat, Adobe and photo caches, Xcode artifacts, browser storage, and package-manager caches.
+              nomospace focuses on high-pain Mac storage patterns and gives each finding a plain-English risk label before anything is selected.
             </p>
             <ul class="signal-list">
-              <li>Auto-selects only safe or usually safe findings.</li>
-              <li>Marks browser profiles and personal folders for review.</li>
-              <li>Shows findings in evaluation mode, then unlocks Save PDF and cleanup with an access code.</li>
+              <li>Safe and usually safe cache rules can be selected quickly.</li>
+              <li>Browser profiles, cloud folders, and personal files stay review-only.</li>
+              <li>Evaluation mode proves the findings before asking users to unlock cleanup.</li>
             </ul>
           </div>
-          <figure class="product-shot">
-            <img
-              src="/assets/nomospace-report-preview.png"
-              alt="nomospace audit report preview showing reclaimable storage, risk labels, and hidden storage findings"
-              width="1200"
-              height="840"
-              loading="lazy"
-            >
-          </figure>
+          <div class="rule-matrix" role="table" aria-label="nomospace storage rule coverage">
+            <div class="rule-matrix-header" role="row">
+              <span role="columnheader">Storage pattern</span>
+              <span role="columnheader">Default</span>
+              <span role="columnheader">What it explains</span>
+            </div>
+            <div class="rule-row" role="row">
+              <strong role="cell">Apple aerial wallpaper videos</strong>
+              <span class="risk-chip review" role="cell">Review</span>
+              <p role="cell">Hidden Apple downloads that can consume tens of GB without obvious user action.</p>
+            </div>
+            <div class="rule-row" role="row">
+              <strong role="cell">Adobe, Lightroom, and photo caches</strong>
+              <span class="risk-chip safe" role="cell">Safe</span>
+              <p role="cell">Rebuildable previews, Camera Raw cache, and workflow storage created by creator apps.</p>
+            </div>
+            <div class="rule-row" role="row">
+              <strong role="cell">Xcode derived data and simulators</strong>
+              <span class="risk-chip usual" role="cell">Usually Safe</span>
+              <p role="cell">Developer artifacts that grow quietly and can usually be recreated after cleanup.</p>
+            </div>
+            <div class="rule-row" role="row">
+              <strong role="cell">npm, pnpm, pip, and uv caches</strong>
+              <span class="risk-chip safe" role="cell">Safe</span>
+              <p role="cell">Package downloads and build caches that tools redownload when needed.</p>
+            </div>
+            <div class="rule-row" role="row">
+              <strong role="cell">Browser and personal folders</strong>
+              <span class="risk-chip review" role="cell">Review</span>
+              <p role="cell">Visible storage without blind cleanup, because profiles and personal data need judgment.</p>
+            </div>
+            <div class="rule-note">
+              Review and protected findings are shown for visibility, not auto-selected.
+            </div>
+          </div>
         </div>
       </section>
 

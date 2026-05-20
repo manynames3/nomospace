@@ -477,14 +477,74 @@ details {
   background: linear-gradient(var(--gold), var(--gold)) left 0.75em / 14px 2px no-repeat;
 }
 
-.product-shot {
-  margin: 0;
-}
-
-.product-shot img {
+.rule-matrix {
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
   box-shadow: var(--shadow);
+}
+
+.rule-matrix-header,
+.rule-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.9fr) minmax(118px, 0.42fr) minmax(0, 1.35fr);
+  gap: 18px;
+  align-items: center;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rule-matrix-header {
+  color: var(--faint);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.rule-row strong {
+  color: var(--cream);
+  line-height: 1.2;
+}
+
+.rule-row p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.risk-chip {
+  justify-self: start;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.risk-chip.safe {
+  color: var(--green);
+  background: rgba(130, 230, 178, 0.11);
+}
+
+.risk-chip.usual {
+  color: var(--blue);
+  background: rgba(117, 167, 255, 0.12);
+}
+
+.risk-chip.review {
+  color: var(--gold);
+  background: rgba(232, 189, 70, 0.12);
+}
+
+.rule-note {
+  padding: 14px 18px;
+  color: var(--gold);
+  background: rgba(232, 189, 70, 0.08);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .comparison-table {
@@ -750,5 +810,15 @@ footer {
   .comparison-table div {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .rule-matrix-header {
+    display: none;
+  }
+
+  .rule-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 16px;
   }
 }
