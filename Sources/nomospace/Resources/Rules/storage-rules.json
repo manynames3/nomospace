@@ -1,0 +1,189 @@
+[
+  {
+    "id": "apple-aerial-wallpaper-videos",
+    "title": "Apple Aerial Wallpaper Videos",
+    "relativePath": "Library/Application Support/com.apple.wallpaper/aerials/videos",
+    "category": "appleSystem",
+    "risk": "usuallySafe",
+    "explanation": "Downloaded aerial wallpaper and screensaver videos. macOS can recreate this folder if the feature is used again.",
+    "sideEffect": "Wallpaper or screensaver choices may reset, and macOS may redownload videos later.",
+    "source": "Apple Wallpaper",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "apple-wallpaper-cache",
+    "title": "Apple Wallpaper Support Data",
+    "relativePath": "Library/Application Support/com.apple.wallpaper",
+    "category": "appleSystem",
+    "risk": "review",
+    "explanation": "Apple wallpaper metadata, thumbnails, manifests, and downloaded wallpaper assets.",
+    "sideEffect": "Wallpaper settings may reset. Prefer removing the aerial videos subfolder when it is listed separately.",
+    "source": "Apple Wallpaper",
+    "minimumBytes": 1073741824
+  },
+  {
+    "id": "adobe-camera-raw-cache",
+    "title": "Adobe Camera Raw Cache",
+    "relativePath": "Library/Caches/Adobe Camera Raw 2",
+    "category": "adobePhoto",
+    "risk": "safe",
+    "explanation": "Adobe Camera Raw stores preview and processing cache files here.",
+    "sideEffect": "Adobe apps may rebuild previews and feel slower for the first few opens.",
+    "source": "Adobe",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "lightroom-classic-cache",
+    "title": "Lightroom Classic Cache",
+    "relativePath": "Library/Caches/com.adobe.LightroomClassicCC7",
+    "category": "adobePhoto",
+    "risk": "usuallySafe",
+    "explanation": "Lightroom Classic cache data used to speed up image browsing and editing.",
+    "sideEffect": "Lightroom may regenerate previews and cached data.",
+    "source": "Adobe Lightroom",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "aftershoot-backend-cache",
+    "title": "Aftershoot Backend Cache",
+    "relativePath": "Library/Caches/aftershoot-backend",
+    "category": "adobePhoto",
+    "risk": "usuallySafe",
+    "explanation": "Aftershoot processing cache files. These are usually rebuildable support files, not source photos.",
+    "sideEffect": "Aftershoot may rebuild local processing cache later.",
+    "source": "Aftershoot",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "xcode-derived-data",
+    "title": "Xcode Derived Data",
+    "relativePath": "Library/Developer/Xcode/DerivedData",
+    "category": "developer",
+    "risk": "safe",
+    "explanation": "Xcode build products, indexes, and intermediate files.",
+    "sideEffect": "Xcode will rebuild project indexes and derived build output later.",
+    "source": "Xcode",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "xcode-ios-device-support",
+    "title": "Xcode iOS Device Support",
+    "relativePath": "Library/Developer/Xcode/iOS DeviceSupport",
+    "category": "developer",
+    "risk": "usuallySafe",
+    "explanation": "Device symbols and support files Xcode stores after connecting iPhones or iPads.",
+    "sideEffect": "Xcode may recreate support files when devices are connected again.",
+    "source": "Xcode",
+    "minimumBytes": 524288000
+  },
+  {
+    "id": "core-simulator-user-devices",
+    "title": "User Simulator Devices",
+    "relativePath": "Library/Developer/CoreSimulator",
+    "category": "developer",
+    "risk": "usuallySafe",
+    "explanation": "Local iOS simulator devices, apps, and runtime data.",
+    "sideEffect": "Simulator devices and their installed test apps may be removed.",
+    "source": "CoreSimulator",
+    "minimumBytes": 524288000
+  },
+  {
+    "id": "npm-download-cache",
+    "title": "npm Download Cache",
+    "relativePath": ".npm/_cacache",
+    "category": "developer",
+    "risk": "safe",
+    "explanation": "npm package tarballs and metadata used to speed up installs.",
+    "sideEffect": "Future npm installs may be slower while packages redownload.",
+    "source": "npm",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "npx-temporary-packages",
+    "title": "npx Temporary Packages",
+    "relativePath": ".npm/_npx",
+    "category": "developer",
+    "risk": "safe",
+    "explanation": "Temporary packages downloaded by npx commands.",
+    "sideEffect": "npx may redownload tools the next time they are used.",
+    "source": "npm",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "pnpm-cache",
+    "title": "pnpm Cache",
+    "relativePath": "Library/Caches/pnpm",
+    "category": "developer",
+    "risk": "safe",
+    "explanation": "pnpm package cache used to speed up JavaScript installs.",
+    "sideEffect": "pnpm may redownload packages later.",
+    "source": "pnpm",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "pip-cache",
+    "title": "pip Cache",
+    "relativePath": "Library/Caches/pip",
+    "category": "developer",
+    "risk": "safe",
+    "explanation": "Python package download cache.",
+    "sideEffect": "pip may redownload packages later.",
+    "source": "pip",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "uv-cache",
+    "title": "uv Cache",
+    "relativePath": ".cache/uv",
+    "category": "developer",
+    "risk": "safe",
+    "explanation": "uv package and environment cache for Python projects.",
+    "sideEffect": "uv may redownload packages later.",
+    "source": "uv",
+    "minimumBytes": 262144000
+  },
+  {
+    "id": "claude-vm-bundles",
+    "title": "Claude VM Bundles",
+    "relativePath": "Library/Application Support/Claude/vm_bundles",
+    "category": "appData",
+    "risk": "usuallySafe",
+    "explanation": "Claude desktop runtime bundles and virtual machine assets.",
+    "sideEffect": "Claude may redownload runtime components the next time local features are used.",
+    "source": "Claude",
+    "minimumBytes": 524288000
+  },
+  {
+    "id": "google-browser-profile-data",
+    "title": "Google Browser Profile Data",
+    "relativePath": "Library/Application Support/Google",
+    "category": "browser",
+    "risk": "review",
+    "explanation": "Chrome and Google app profiles, site storage, extensions, and account data.",
+    "sideEffect": "Removing this can affect browser profiles, extensions, login state, and local web app data.",
+    "source": "Google",
+    "minimumBytes": 1073741824
+  },
+  {
+    "id": "google-cache",
+    "title": "Google Cache",
+    "relativePath": "Library/Caches/Google",
+    "category": "browser",
+    "risk": "review",
+    "explanation": "Cache used by Google apps and Chrome. This may include browser cache and local web app data.",
+    "sideEffect": "Browser cache and local web app state may be recreated or reset.",
+    "source": "Google",
+    "minimumBytes": 524288000
+  },
+  {
+    "id": "steam-library",
+    "title": "Steam Library Content",
+    "relativePath": "Library/Application Support/Steam/steamapps",
+    "category": "appData",
+    "risk": "review",
+    "explanation": "Installed Steam games and downloaded game content.",
+    "sideEffect": "Prefer uninstalling games through Steam. Removing this directly can break Steam installs.",
+    "source": "Steam",
+    "minimumBytes": 1073741824
+  }
+]

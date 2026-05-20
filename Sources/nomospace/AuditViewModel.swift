@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import UniformTypeIdentifiers
 
 @MainActor
 final class AuditViewModel: ObservableObject {
@@ -8,11 +9,29 @@ final class AuditViewModel: ObservableObject {
     @Published var searchText = ""
     @Published var activeFilter: FindingFilter = .all
     @Published var isScanning = false
+    @Published var scanProgress = ScanProgress.idle
+    @Published var scanIssues: [ScanIssue] = []
     @Published var cleanupDraft: CleanupDraft?
     @Published var cleanupResult: CleanupResult?
+    @Published var reportExportResult: ReportExportResult?
     @Published var lastScanDate: Date?
+    @Published var didCancelScan = false
 
-    private let scanner = StorageScanner()
+    private let scanner: StorageScanner
+    private let cancellation = ScanCancellation()
+    let historyStore: HistoryStore
+
+    init(
+        scanner: StorageScanner = StorageScanner(),
+        historyStore: HistoryStore = HistoryStore()
+    ) {
+        self.scanner = scanner
+        self.historyStore = historyStore
+    }
+
+    var ruleCount: Int {
+        scanner.rules.count
+    }
 
     var filteredFindings: [StorageFinding] {
         findings.filter { finding in
@@ -58,14 +77,80 @@ final class AuditViewModel: ObservableObject {
         guard !isScanning else { return }
 
         isScanning = true
+        didCancelScan = false
+        scanIssues = []
+        scanProgress = ScanProgress(
+            phase: "Starting audit",
+            currentPath: "",
+            scannedItems: 0,
+            foundItems: 0
+        )
+        cancellation.reset()
         selectedIDs.removeAll()
 
         Task {
-            let scanned = await scanner.scan()
-            findings = scanned
+            let report = await scanner.scan(
+                progressHandler: { [weak self] progress in
+                    Task { @MainActor in
+                        self?.scanProgress = progress
+                    }
+                },
+                shouldCancel: { [cancellation] in
+                    cancellation.isCancelled
+                }
+            )
+            findings = report.findings
+            var issues = report.issues
+            if scanner.rules.isEmpty {
+                issues.insert(
+                    ScanIssue(
+                        path: "Bundled rule library",
+                        message: "nomospace could not load its cleanup rules. Reinstall the app or use a packaged build."
+                    ),
+                    at: 0
+                )
+            }
+            scanIssues = issues
             lastScanDate = Date()
             isScanning = false
+            if cancellation.isCancelled {
+                didCancelScan = true
+                scanProgress.phase = "Canceled"
+            }
         }
+    }
+
+    func cancelAudit() {
+        cancellation.cancel()
+        scanProgress.phase = "Canceling"
+    }
+
+    func openFullDiskAccessSettings() {
+        PermissionGuide.openFullDiskAccessSettings()
+    }
+
+    func dismissIssues() {
+        scanIssues.removeAll()
+    }
+
+    func dismissCleanupResult() {
+        cleanupResult = nil
+    }
+
+    func clearHistory() {
+        historyStore.clear()
+    }
+
+    var hasRiskySelection: Bool {
+        selectedFindings.contains { $0.risk == .review }
+    }
+
+    var totalHistoryBytes: Int64 {
+        historyStore.records.reduce(0) { $0 + $1.reclaimedBytes }
+    }
+
+    var historyRecords: [CleanupHistoryRecord] {
+        historyStore.records
     }
 
     func toggle(_ finding: StorageFinding) {
@@ -104,9 +189,56 @@ final class AuditViewModel: ObservableObject {
             cleanupResult = result
 
             let movedIDs = Set(draft.findings.map(\.id)).subtracting(result.failed.map { $0.0.id })
+            let movedFindings = draft.findings.filter { movedIDs.contains($0.id) }
+            historyStore.record(result: result, movedFindings: movedFindings)
             findings.removeAll { movedIDs.contains($0.id) }
             selectedIDs.subtract(movedIDs)
         }
+    }
+
+    func exportAuditReport() {
+        guard !findings.isEmpty else {
+            reportExportResult = ReportExportResult(
+                title: "No Report to Export",
+                message: "Run a storage audit before exporting a report."
+            )
+            return
+        }
+
+        let panel = NSSavePanel()
+        panel.title = "Export nomospace Audit Report"
+        panel.nameFieldStringValue = "nomospace-audit-report.md"
+        panel.canCreateDirectories = true
+        panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
+
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+
+        let report = AuditReport.render(
+            findings: findings,
+            issues: scanIssues,
+            lastScanDate: lastScanDate,
+            ruleCount: ruleCount,
+            historyRecords: historyRecords
+        )
+
+        do {
+            try report.write(to: url, atomically: true, encoding: .utf8)
+            reportExportResult = ReportExportResult(
+                title: "Report Exported",
+                message: "Saved \(url.lastPathComponent)."
+            )
+        } catch {
+            reportExportResult = ReportExportResult(
+                title: "Export Failed",
+                message: error.localizedDescription
+            )
+        }
+    }
+
+    func openTrash() {
+        let trashURL = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".Trash", isDirectory: true)
+        NSWorkspace.shared.open(trashURL)
     }
 
     func revealInFinder(_ finding: StorageFinding) {
@@ -142,6 +274,29 @@ final class AuditViewModel: ObservableObject {
         case .personal:
             finding.category == .personal || finding.category == .media
         }
+    }
+}
+
+private final class ScanCancellation: @unchecked Sendable {
+    private let lock = NSLock()
+    private var cancelled = false
+
+    var isCancelled: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return cancelled
+    }
+
+    func cancel() {
+        lock.lock()
+        cancelled = true
+        lock.unlock()
+    }
+
+    func reset() {
+        lock.lock()
+        cancelled = false
+        lock.unlock()
     }
 }
 

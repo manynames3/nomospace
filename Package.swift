@@ -13,7 +13,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "nomospace",
-            path: "Sources/nomospace"
+            path: "Sources/nomospace",
+            resources: [
+                .process("Resources")
+            ]
         )
     ]
 )

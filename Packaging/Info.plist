@@ -8,6 +8,8 @@
 	<string>nomospace</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.nomospace.app</string>
+	<key>CFBundleIconFile</key>
+	<string>nomospace</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

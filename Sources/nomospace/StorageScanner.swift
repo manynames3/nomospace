@@ -1,165 +1,7 @@
 import Foundation
 
-struct StorageScanner: Sendable {
-    func scan() async -> [StorageFinding] {
-        let known = knownCandidates()
-
-        return await Task.detached(priority: .userInitiated) {
-            var findings: [StorageFinding] = []
-            var knownExistingPaths: Set<String> = []
-
-            for candidate in known {
-                guard candidate.url.exists else { continue }
-                let size = DirectorySizer.allocatedSize(at: candidate.url)
-                guard size >= candidate.minimumBytes else { continue }
-                knownExistingPaths.insert(candidate.url.standardizedFileURL.path)
-                findings.append(candidate.finding(sizeBytes: size))
-            }
-
-            findings.append(contentsOf: scanLargeChildren(
-                parent: Self.home.appendingPathComponent("Library/Application Support"),
-                category: .appData,
-                risk: .review,
-                minimumBytes: 750.megabytes,
-                source: "Application Support",
-                knownSpecificPaths: knownExistingPaths
-            ))
-
-            findings.append(contentsOf: scanLargeChildren(
-                parent: Self.home.appendingPathComponent("Library/Caches"),
-                category: .cache,
-                risk: .safe,
-                minimumBytes: 250.megabytes,
-                source: "User Cache",
-                knownSpecificPaths: knownExistingPaths
-            ))
-
-            findings.append(contentsOf: scanPersonalFolders(knownSpecificPaths: knownExistingPaths))
-
-            return findings
-                .uniqueByPath()
-                .sorted { lhs, rhs in
-                    if lhs.sizeBytes == rhs.sizeBytes {
-                        return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
-                    }
-                    return lhs.sizeBytes > rhs.sizeBytes
-                }
-        }.value
-    }
-
-    private static var home: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-    }
-
-    private func knownCandidates() -> [KnownCandidate] {
-        let home = Self.home
-
-        return [
-            KnownCandidate(
-                title: "Apple Aerial Wallpaper Videos",
-                relativePath: "Library/Application Support/com.apple.wallpaper/aerials/videos",
-                category: .appleSystem,
-                risk: .usuallySafe,
-                explanation: "Downloaded aerial wallpaper and screensaver videos. macOS can recreate this folder if the feature is used again.",
-                sideEffect: "Wallpaper or screensaver choices may reset, and macOS may redownload videos later.",
-                source: "Apple Wallpaper",
-                minimumBytes: 250.megabytes
-            ),
-            KnownCandidate(
-                title: "Adobe Camera Raw Cache",
-                relativePath: "Library/Caches/Adobe Camera Raw 2",
-                category: .adobePhoto,
-                risk: .safe,
-                explanation: "Adobe Camera Raw stores preview and processing cache files here.",
-                sideEffect: "Adobe apps may rebuild previews and feel slower for the first few opens.",
-                source: "Adobe",
-                minimumBytes: 250.megabytes
-            ),
-            KnownCandidate(
-                title: "Lightroom Classic Cache",
-                relativePath: "Library/Caches/com.adobe.LightroomClassicCC7",
-                category: .adobePhoto,
-                risk: .usuallySafe,
-                explanation: "Lightroom Classic cache data used to speed up image browsing and editing.",
-                sideEffect: "Lightroom may regenerate previews and cached data.",
-                source: "Adobe Lightroom",
-                minimumBytes: 250.megabytes
-            ),
-            KnownCandidate(
-                title: "Xcode Derived Data",
-                relativePath: "Library/Developer/Xcode/DerivedData",
-                category: .developer,
-                risk: .safe,
-                explanation: "Xcode build products, indexes, and intermediate files.",
-                sideEffect: "Xcode will rebuild project indexes and derived build output later.",
-                source: "Xcode",
-                minimumBytes: 250.megabytes
-            ),
-            KnownCandidate(
-                title: "Xcode iOS Device Support",
-                relativePath: "Library/Developer/Xcode/iOS DeviceSupport",
-                category: .developer,
-                risk: .usuallySafe,
-                explanation: "Device symbols and support files Xcode stores after connecting iPhones or iPads.",
-                sideEffect: "Xcode may recreate support files when devices are connected again.",
-                source: "Xcode",
-                minimumBytes: 500.megabytes
-            ),
-            KnownCandidate(
-                title: "User Simulator Devices",
-                relativePath: "Library/Developer/CoreSimulator",
-                category: .developer,
-                risk: .usuallySafe,
-                explanation: "Local iOS simulator devices, apps, and runtime data.",
-                sideEffect: "Simulator devices and their installed test apps may be removed.",
-                source: "CoreSimulator",
-                minimumBytes: 500.megabytes
-            ),
-            KnownCandidate(
-                title: "npm Download Cache",
-                relativePath: ".npm/_cacache",
-                category: .developer,
-                risk: .safe,
-                explanation: "npm package tarballs and metadata used to speed up installs.",
-                sideEffect: "Future npm installs may be slower while packages redownload.",
-                source: "npm",
-                minimumBytes: 250.megabytes
-            ),
-            KnownCandidate(
-                title: "npx Temporary Packages",
-                relativePath: ".npm/_npx",
-                category: .developer,
-                risk: .safe,
-                explanation: "Temporary packages downloaded by npx commands.",
-                sideEffect: "npx may redownload tools the next time they are used.",
-                source: "npm",
-                minimumBytes: 250.megabytes
-            ),
-            KnownCandidate(
-                title: "Claude VM Bundles",
-                relativePath: "Library/Application Support/Claude/vm_bundles",
-                category: .appData,
-                risk: .usuallySafe,
-                explanation: "Claude desktop runtime bundles and virtual machine assets.",
-                sideEffect: "Claude may redownload runtime components the next time local features are used.",
-                source: "Claude",
-                minimumBytes: 500.megabytes
-            ),
-            KnownCandidate(
-                title: "Google Browser Profile Data",
-                relativePath: "Library/Application Support/Google",
-                category: .browser,
-                risk: .review,
-                explanation: "Chrome and Google app profiles, site storage, extensions, and account data.",
-                sideEffect: "Removing this can affect browser profiles, extensions, login state, and local web app data.",
-                source: "Google",
-                minimumBytes: 1.gigabytes
-            )
-        ].map { $0.resolved(relativeTo: home) }
-    }
-}
-
-private struct KnownCandidate: Sendable {
+struct StorageRule: Codable, Identifiable, Sendable {
+    let id: String
     let title: String
     let relativePath: String
     let category: FindingCategory
@@ -168,20 +10,18 @@ private struct KnownCandidate: Sendable {
     let sideEffect: String
     let source: String
     let minimumBytes: Int64
-    private(set) var url: URL = FileManager.default.homeDirectoryForCurrentUser
 
-    func resolved(relativeTo baseURL: URL) -> KnownCandidate {
-        var copy = self
-        copy.url = baseURL.appendingPathComponent(relativePath)
-        return copy
+    func url(relativeTo homeURL: URL) -> URL {
+        homeURL.appendingPathComponent(relativePath)
     }
 
-    func finding(sizeBytes: Int64) -> StorageFinding {
-        StorageFinding(
-            id: url.standardizedFileURL.path,
+    func finding(homeURL: URL, sizeBytes: Int64) -> StorageFinding {
+        let resolvedURL = url(relativeTo: homeURL)
+        return StorageFinding(
+            id: resolvedURL.standardizedFileURL.path,
             title: title,
             sizeBytes: sizeBytes,
-            url: url,
+            url: resolvedURL,
             category: category,
             risk: risk,
             explanation: explanation,
@@ -189,6 +29,147 @@ private struct KnownCandidate: Sendable {
             source: source
         )
     }
+
+    static func bundledRules() -> [StorageRule] {
+        let appBundleURL = Bundle.main.resourceURL?
+            .appendingPathComponent("nomospace_nomospace.bundle")
+            .appendingPathComponent("storage-rules.json")
+        let packageBundleURL = Bundle.module.url(forResource: "storage-rules", withExtension: "json")
+
+        guard let url = [appBundleURL, packageBundleURL].compactMap({ $0 }).first(where: {
+            FileManager.default.fileExists(atPath: $0.path)
+        }) else { return [] }
+
+        do {
+            let data = try Data(contentsOf: url)
+            return try JSONDecoder().decode([StorageRule].self, from: data)
+        } catch {
+            return []
+        }
+    }
+}
+
+struct StorageScanner: Sendable {
+    let homeURL: URL
+    let rules: [StorageRule]
+
+    init(
+        homeURL: URL = FileManager.default.homeDirectoryForCurrentUser,
+        rules: [StorageRule] = StorageRule.bundledRules()
+    ) {
+        self.homeURL = homeURL
+        self.rules = rules
+    }
+
+    func scan(
+        progressHandler: @Sendable @escaping (ScanProgress) -> Void = { _ in },
+        shouldCancel: @Sendable @escaping () -> Bool = { false }
+    ) async -> ScanReport {
+        let homeURL = homeURL
+        let rules = rules
+
+        return await Task.detached(priority: .userInitiated) {
+            var findings: [StorageFinding] = []
+            var issues: [ScanIssue] = []
+            var knownExistingPaths = Set<String>()
+            var progress = ScanProgress(
+                phase: "Checking known storage patterns",
+                currentPath: "",
+                scannedItems: 0,
+                foundItems: 0
+            )
+
+            func emit(_ phase: String, _ path: String = "") {
+                progress.phase = phase
+                progress.currentPath = path
+                progress.scannedItems += 1
+                progress.foundItems = findings.count
+                progressHandler(progress)
+            }
+
+            for rule in rules {
+                guard !shouldCancel() else {
+                    return ScanReport(findings: findings.withoutNestedDuplicates(), issues: issues)
+                }
+
+                let url = rule.url(relativeTo: homeURL)
+                emit("Checking known storage patterns", url.path)
+                guard url.exists else { continue }
+
+                let result = DirectorySizer.allocatedSize(at: url)
+                issues.append(contentsOf: result.issues)
+                guard result.sizeBytes >= rule.minimumBytes else { continue }
+
+                knownExistingPaths.insert(url.standardizedFileURL.path)
+                findings.append(rule.finding(homeURL: homeURL, sizeBytes: result.sizeBytes))
+            }
+
+            guard !shouldCancel() else {
+                return ScanReport(findings: findings.withoutNestedDuplicates(), issues: issues)
+            }
+
+            let appSupport = scanLargeChildren(
+                parent: homeURL.appendingPathComponent("Library/Application Support"),
+                category: .appData,
+                risk: .review,
+                minimumBytes: 750.megabytes,
+                source: "Application Support",
+                knownSpecificPaths: knownExistingPaths,
+                progress: { path in emit("Scanning Application Support", path) },
+                shouldCancel: shouldCancel
+            )
+            findings.append(contentsOf: appSupport.findings)
+            issues.append(contentsOf: appSupport.issues)
+
+            guard !shouldCancel() else {
+                return ScanReport(findings: findings.withoutNestedDuplicates(), issues: issues)
+            }
+
+            let caches = scanLargeChildren(
+                parent: homeURL.appendingPathComponent("Library/Caches"),
+                category: .cache,
+                risk: .safe,
+                minimumBytes: 250.megabytes,
+                source: "User Cache",
+                knownSpecificPaths: knownExistingPaths,
+                progress: { path in emit("Scanning caches", path) },
+                shouldCancel: shouldCancel
+            )
+            findings.append(contentsOf: caches.findings)
+            issues.append(contentsOf: caches.issues)
+
+            let personal = scanPersonalFolders(
+                homeURL: homeURL,
+                knownSpecificPaths: knownExistingPaths,
+                progress: { path in emit("Checking personal folders", path) },
+                shouldCancel: shouldCancel
+            )
+            findings.append(contentsOf: personal.findings)
+            issues.append(contentsOf: personal.issues)
+
+            progress.phase = "Finished"
+            progress.currentPath = ""
+            progress.foundItems = findings.count
+            progressHandler(progress)
+
+            return ScanReport(
+                findings: findings
+                    .withoutNestedDuplicates()
+                    .sorted { lhs, rhs in
+                        if lhs.sizeBytes == rhs.sizeBytes {
+                            return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
+                        }
+                        return lhs.sizeBytes > rhs.sizeBytes
+                    },
+                issues: Array(issues.prefix(50))
+            )
+        }.value
+    }
+}
+
+private struct ScanSectionResult: Sendable {
+    let findings: [StorageFinding]
+    let issues: [ScanIssue]
 }
 
 private func scanLargeChildren(
@@ -197,30 +178,51 @@ private func scanLargeChildren(
     risk: RiskLevel,
     minimumBytes: Int64,
     source: String,
-    knownSpecificPaths: Set<String>
-) -> [StorageFinding] {
-    guard parent.exists else { return [] }
+    knownSpecificPaths: Set<String>,
+    progress: (String) -> Void,
+    shouldCancel: () -> Bool
+) -> ScanSectionResult {
+    guard parent.exists else {
+        return ScanSectionResult(findings: [], issues: [])
+    }
 
-    let children = (try? FileManager.default.contentsOfDirectory(
-        at: parent,
-        includingPropertiesForKeys: [.isDirectoryKey],
-        options: [.skipsHiddenFiles]
-    )) ?? []
+    let children: [URL]
+    do {
+        children = try FileManager.default.contentsOfDirectory(
+            at: parent,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        )
+    } catch {
+        return ScanSectionResult(
+            findings: [],
+            issues: [
+                ScanIssue(path: parent.path, message: "Unable to inspect: \(error.localizedDescription)")
+            ]
+        )
+    }
 
-    return children.compactMap { child in
+    var findings: [StorageFinding] = []
+    var issues: [ScanIssue] = []
+
+    for child in children {
+        guard !shouldCancel() else { break }
+        progress(child.path)
+
         let standardizedPath = child.standardizedFileURL.path
-        guard !knownSpecificPaths.contains(standardizedPath) else { return nil }
+        guard !knownSpecificPaths.contains(standardizedPath) else { continue }
         guard !knownSpecificPaths.contains(where: { knownPath in
             knownPath.hasPrefix(standardizedPath + "/")
-        }) else { return nil }
+        }) else { continue }
 
-        let size = DirectorySizer.allocatedSize(at: child)
-        guard size >= minimumBytes else { return nil }
+        let result = DirectorySizer.allocatedSize(at: child)
+        issues.append(contentsOf: result.issues)
+        guard result.sizeBytes >= minimumBytes else { continue }
 
-        return StorageFinding(
+        findings.append(StorageFinding(
             id: standardizedPath,
             title: child.lastPathComponent,
-            sizeBytes: size,
+            sizeBytes: result.sizeBytes,
             url: child,
             category: category,
             risk: risk,
@@ -229,12 +231,18 @@ private func scanLargeChildren(
                 ? "The app may rebuild these files later."
                 : "Review this path before selecting it. It may contain app state or local user data.",
             source: source
-        )
+        ))
     }
+
+    return ScanSectionResult(findings: findings, issues: Array(issues.prefix(30)))
 }
 
-private func scanPersonalFolders(knownSpecificPaths: Set<String>) -> [StorageFinding] {
-    let home = FileManager.default.homeDirectoryForCurrentUser
+private func scanPersonalFolders(
+    homeURL: URL,
+    knownSpecificPaths: Set<String>,
+    progress: (String) -> Void,
+    shouldCancel: () -> Bool
+) -> ScanSectionResult {
     let folders: [(String, FindingCategory, RiskLevel, String)] = [
         ("Desktop", .personal, .protected, "Desktop files are usually personal or active work."),
         ("Downloads", .personal, .review, "Downloads may contain installers, exports, documents, and media."),
@@ -244,41 +252,56 @@ private func scanPersonalFolders(knownSpecificPaths: Set<String>) -> [StorageFin
         ("Aftershoot Projects", .media, .protected, "Aftershoot projects may contain active photo work.")
     ]
 
-    return folders.compactMap { name, category, risk, explanation in
-        let url = home.appendingPathComponent(name)
+    var findings: [StorageFinding] = []
+    var issues: [ScanIssue] = []
+
+    for (name, category, risk, explanation) in folders {
+        guard !shouldCancel() else { break }
+
+        let url = homeURL.appendingPathComponent(name)
+        progress(url.path)
         let standardizedPath = url.standardizedFileURL.path
-        guard url.exists else { return nil }
-        guard !knownSpecificPaths.contains(standardizedPath) else { return nil }
+        guard url.exists else { continue }
+        guard !knownSpecificPaths.contains(standardizedPath) else { continue }
 
-        let size = DirectorySizer.allocatedSize(at: url)
-        guard size >= 500.megabytes else { return nil }
+        let result = DirectorySizer.allocatedSize(at: url)
+        issues.append(contentsOf: result.issues)
+        guard result.sizeBytes >= 500.megabytes else { continue }
 
-        return StorageFinding(
+        findings.append(StorageFinding(
             id: standardizedPath,
             title: name,
-            sizeBytes: size,
+            sizeBytes: result.sizeBytes,
             url: url,
             category: category,
             risk: risk,
             explanation: explanation,
             sideEffect: "Use Reveal in Finder and decide manually. nomospace does not auto-select personal folders.",
             source: "Home Folder"
-        )
+        ))
     }
+
+    return ScanSectionResult(findings: findings, issues: Array(issues.prefix(30)))
+}
+
+private struct DirectorySizeResult: Sendable {
+    let sizeBytes: Int64
+    let issues: [ScanIssue]
 }
 
 private enum DirectorySizer {
-    static func allocatedSize(at url: URL) -> Int64 {
+    static func allocatedSize(at url: URL) -> DirectorySizeResult {
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
-            return 0
+            return DirectorySizeResult(sizeBytes: 0, issues: [])
         }
 
         if !isDirectory.boolValue {
-            return allocatedSizeForFile(at: url)
+            return DirectorySizeResult(sizeBytes: allocatedSizeForFile(at: url), issues: [])
         }
 
         var total: Int64 = 0
+        var issues: [ScanIssue] = []
         let keys: [URLResourceKey] = [
             .isRegularFileKey,
             .isSymbolicLinkKey,
@@ -290,9 +313,17 @@ private enum DirectorySizer {
             at: url,
             includingPropertiesForKeys: keys,
             options: [],
-            errorHandler: { _, _ in true }
+            errorHandler: { url, error in
+                if issues.count < 20 {
+                    issues.append(ScanIssue(path: url.path, message: "Skipped: \(error.localizedDescription)"))
+                }
+                return true
+            }
         ) else {
-            return 0
+            return DirectorySizeResult(
+                sizeBytes: 0,
+                issues: [ScanIssue(path: url.path, message: "Unable to enumerate this folder.")]
+            )
         }
 
         for case let fileURL as URL in enumerator {
@@ -303,7 +334,7 @@ private enum DirectorySizer {
             }
         }
 
-        return total
+        return DirectorySizeResult(sizeBytes: total, issues: issues)
     }
 
     private static func allocatedSizeForFile(at url: URL) -> Int64 {
@@ -322,17 +353,24 @@ private extension URL {
 
 private extension Int {
     var megabytes: Int64 { Int64(self) * 1_024 * 1_024 }
-    var gigabytes: Int64 { Int64(self) * 1_024 * 1_024 * 1_024 }
 }
 
 private extension Array where Element == StorageFinding {
-    func uniqueByPath() -> [StorageFinding] {
-        var seen = Set<String>()
-        return filter { finding in
+    func withoutNestedDuplicates() -> [StorageFinding] {
+        var selected: [StorageFinding] = []
+
+        for finding in sorted(by: { lhs, rhs in
+            lhs.path.split(separator: "/").count > rhs.path.split(separator: "/").count
+        }) {
             let path = finding.url.standardizedFileURL.path
-            guard !seen.contains(path) else { return false }
-            seen.insert(path)
-            return true
+            let isParentOfExisting = selected.contains { existing in
+                existing.url.standardizedFileURL.path.hasPrefix(path + "/")
+            }
+            if !isParentOfExisting && !selected.contains(where: { $0.path == path }) {
+                selected.append(finding)
+            }
         }
+
+        return selected
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-enum RiskLevel: String, CaseIterable, Identifiable, Sendable {
+enum RiskLevel: String, CaseIterable, Codable, Identifiable, Sendable {
     case safe
     case usuallySafe
     case review
@@ -42,7 +42,7 @@ enum RiskLevel: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-enum FindingCategory: String, CaseIterable, Identifiable, Sendable {
+enum FindingCategory: String, CaseIterable, Codable, Identifiable, Sendable {
     case appleSystem
     case developer
     case adobePhoto
@@ -128,6 +128,68 @@ struct CleanupResult: Identifiable {
     let movedCount: Int
     let failed: [(StorageFinding, String)]
     let reclaimedBytes: Int64
+}
+
+struct ReportExportResult: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+}
+
+struct ScanIssue: Codable, Hashable, Identifiable, Sendable {
+    let id: UUID
+    let path: String
+    let message: String
+
+    init(id: UUID = UUID(), path: String, message: String) {
+        self.id = id
+        self.path = path
+        self.message = message
+    }
+}
+
+struct ScanProgress: Equatable, Sendable {
+    var phase: String
+    var currentPath: String
+    var scannedItems: Int
+    var foundItems: Int
+
+    static let idle = ScanProgress(
+        phase: "Ready",
+        currentPath: "",
+        scannedItems: 0,
+        foundItems: 0
+    )
+}
+
+struct ScanReport: Sendable {
+    let findings: [StorageFinding]
+    let issues: [ScanIssue]
+}
+
+struct CleanupHistoryRecord: Codable, Identifiable, Sendable {
+    let id: UUID
+    let date: Date
+    let movedCount: Int
+    let reclaimedBytes: Int64
+    let itemTitles: [String]
+    let itemPaths: [String]
+
+    init(
+        id: UUID = UUID(),
+        date: Date = Date(),
+        movedCount: Int,
+        reclaimedBytes: Int64,
+        itemTitles: [String],
+        itemPaths: [String]
+    ) {
+        self.id = id
+        self.date = date
+        self.movedCount = movedCount
+        self.reclaimedBytes = reclaimedBytes
+        self.itemTitles = itemTitles
+        self.itemPaths = itemPaths
+    }
 }
 
 extension Int64 {

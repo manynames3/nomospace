@@ -2,34 +2,55 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel = AuditViewModel()
-    @State private var selectedSection = "Audit"
+    @State private var selectedSection: AppSection = .audit
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
     var body: some View {
         NavigationSplitView {
             Sidebar(selectedSection: $selectedSection)
         } detail: {
-            AuditScreen(viewModel: viewModel)
-                .background(AppTheme.page)
+            Group {
+                switch selectedSection {
+                case .audit:
+                    AuditScreen(viewModel: viewModel)
+                case .history:
+                    HistoryScreen(viewModel: viewModel)
+                case .guide:
+                    TrustGuideScreen(viewModel: viewModel)
+                case .about:
+                    AboutScreen(viewModel: viewModel)
+                }
+            }
+            .background(AppTheme.page)
         }
         .onAppear {
-            if viewModel.findings.isEmpty {
+            if hasSeenOnboarding && viewModel.findings.isEmpty {
                 viewModel.runAudit()
             }
         }
     }
 }
 
-private struct Sidebar: View {
-    @Binding var selectedSection: String
+enum AppSection: String, CaseIterable, Identifiable {
+    case audit = "Audit"
+    case history = "History"
+    case guide = "Guide"
+    case about = "About"
 
-    private let sections = [
-        ("Audit", "waveform.path.ecg.rectangle"),
-        ("Findings", "list.bullet.rectangle"),
-        ("Cleanup Plan", "checklist"),
-        ("History", "clock.arrow.circlepath"),
-        ("Rules", "slider.horizontal.3"),
-        ("Settings", "gearshape")
-    ]
+    var id: String { rawValue }
+
+    var symbolName: String {
+        switch self {
+        case .audit: "waveform.path.ecg.rectangle"
+        case .history: "clock.arrow.circlepath"
+        case .guide: "lock.shield"
+        case .about: "info.circle"
+        }
+    }
+}
+
+private struct Sidebar: View {
+    @Binding var selectedSection: AppSection
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -44,14 +65,14 @@ private struct Sidebar: View {
             .padding(.top, 28)
 
             VStack(spacing: 4) {
-                ForEach(sections, id: \.0) { title, symbol in
+                ForEach(AppSection.allCases) { section in
                     Button {
-                        selectedSection = title
+                        selectedSection = section
                     } label: {
                         HStack(spacing: 10) {
-                            Image(systemName: symbol)
+                            Image(systemName: section.symbolName)
                                 .frame(width: 18)
-                            Text(title)
+                            Text(section.rawValue)
                             Spacer()
                         }
                         .padding(.horizontal, 12)
@@ -59,10 +80,10 @@ private struct Sidebar: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(selectedSection == title ? .primary : .secondary)
+                    .foregroundStyle(selectedSection == section ? .primary : .secondary)
                     .background(
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(selectedSection == title ? Color.primary.opacity(0.08) : .clear)
+                            .fill(selectedSection == section ? Color.primary.opacity(0.08) : .clear)
                     )
                 }
             }
@@ -89,19 +110,45 @@ private struct Sidebar: View {
 
 struct AuditScreen: View {
     @ObservedObject var viewModel: AuditViewModel
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     AuditHeader(viewModel: viewModel)
+                    if !hasSeenOnboarding {
+                        OnboardingPanel(
+                            runAudit: {
+                                hasSeenOnboarding = true
+                                viewModel.runAudit()
+                            },
+                            openFullDiskAccess: viewModel.openFullDiskAccessSettings,
+                            dismiss: { hasSeenOnboarding = true }
+                        )
+                    }
                     SummaryGrid(viewModel: viewModel)
+                    AuditHealthStrip(viewModel: viewModel)
                     FindingsToolbar(viewModel: viewModel)
+                    if !viewModel.scanIssues.isEmpty {
+                        ScanIssuesPanel(
+                            issues: viewModel.scanIssues,
+                            openFullDiskAccess: viewModel.openFullDiskAccessSettings,
+                            dismiss: viewModel.dismissIssues
+                        )
+                    }
 
                     if viewModel.isScanning {
-                        ScanningState()
+                        ScanningState(
+                            progress: viewModel.scanProgress,
+                            cancel: viewModel.cancelAudit
+                        )
                     } else if viewModel.findings.isEmpty {
-                        EmptyState(runAudit: viewModel.runAudit)
+                        EmptyState(
+                            didCancel: viewModel.didCancelScan,
+                            runAudit: viewModel.runAudit,
+                            openFullDiskAccess: viewModel.openFullDiskAccessSettings
+                        )
                     } else {
                         FindingsList(viewModel: viewModel)
                             .padding(.bottom, viewModel.selectedIDs.isEmpty ? 20 : 96)
@@ -133,6 +180,16 @@ struct AuditScreen: View {
             return Alert(
                 title: Text("Cleanup Finished"),
                 message: Text(message),
+                primaryButton: .default(Text("Open Trash")) {
+                    viewModel.openTrash()
+                },
+                secondaryButton: .cancel(Text("Done"))
+            )
+        }
+        .alert(item: $viewModel.reportExportResult) { result in
+            Alert(
+                title: Text(result.title),
+                message: Text(result.message),
                 dismissButton: .default(Text("Done"))
             )
         }
@@ -164,6 +221,72 @@ private struct AuditHeader: View {
             .controlSize(.large)
             .disabled(viewModel.isScanning)
         }
+    }
+}
+
+private struct OnboardingPanel: View {
+    let runAudit: () -> Void
+    let openFullDiskAccess: () -> Void
+    let dismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: "lock.shield")
+                    .font(.system(size: 28))
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(width: 46, height: 46)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(AppTheme.accent.opacity(0.12))
+                    )
+
+                VStack(alignment: .leading, spacing: 7) {
+                    Text("A storage audit, not a blind cleaner.")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                    Text("nomospace scans local folders, explains why storage is large, and moves selected items to Trash first. It does not upload file names, read browser passwords, or permanently delete without your action.")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            HStack(spacing: 10) {
+                TrustPill(symbol: "externaldrive", title: "Find hidden System Data")
+                TrustPill(symbol: "tag", title: "Risk-labeled cleanup")
+                TrustPill(symbol: "trash", title: "Trash-first execution")
+            }
+
+            Text("For the most complete scan, enable Full Disk Access. If nomospace is not listed, drag the app into the Full Disk Access list, enable it, then rerun the audit.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+
+            HStack {
+                Button("Open Full Disk Access", action: openFullDiskAccess)
+                Spacer()
+                Button("Skip for now", action: dismiss)
+                Button("Run Audit", action: runAudit)
+                    .buttonStyle(.borderedProminent)
+            }
+        }
+        .padding(16)
+        .panel()
+    }
+}
+
+private struct TrustPill: View {
+    let symbol: String
+    let title: String
+
+    var body: some View {
+        Label(title, systemImage: symbol)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.primary.opacity(0.055))
+            )
     }
 }
 
@@ -248,6 +371,46 @@ private struct SummaryMetric: View {
     }
 }
 
+private struct AuditHealthStrip: View {
+    @ObservedObject var viewModel: AuditViewModel
+
+    var body: some View {
+        HStack(spacing: 12) {
+            HealthItem(
+                symbol: viewModel.ruleCount > 0 ? "checkmark.seal" : "exclamationmark.triangle",
+                title: viewModel.ruleCount > 0 ? "\(viewModel.ruleCount) cleanup rules loaded" : "Rule library missing",
+                tint: viewModel.ruleCount > 0 ? AppTheme.green : AppTheme.red
+            )
+            Divider()
+                .frame(height: 20)
+            HealthItem(symbol: "lock", title: "Local-only scan", tint: AppTheme.accent)
+            Divider()
+                .frame(height: 20)
+            HealthItem(symbol: "trash", title: "Trash-first cleanup", tint: AppTheme.accent)
+            Spacer()
+            if !viewModel.scanIssues.isEmpty {
+                Text("\(viewModel.scanIssues.count) skipped path(s)")
+                    .font(.caption)
+                    .foregroundStyle(AppTheme.amber)
+            }
+        }
+        .padding(12)
+        .panel()
+    }
+}
+
+private struct HealthItem: View {
+    let symbol: String
+    let title: String
+    let tint: Color
+
+    var body: some View {
+        Label(title, systemImage: symbol)
+            .font(.caption)
+            .foregroundStyle(tint)
+    }
+}
+
 private struct FindingsToolbar: View {
     @ObservedObject var viewModel: AuditViewModel
 
@@ -276,6 +439,13 @@ private struct FindingsToolbar: View {
                     viewModel.clearSelection()
                 }
                 .disabled(viewModel.selectedIDs.isEmpty)
+
+                Button {
+                    viewModel.exportAuditReport()
+                } label: {
+                    Label("Export Report", systemImage: "square.and.arrow.up")
+                }
+                .disabled(viewModel.findings.isEmpty || viewModel.isScanning)
             }
 
             HStack(spacing: 8) {
@@ -320,36 +490,102 @@ private struct FilterChip: View {
 }
 
 private struct ScanningState: View {
+    let progress: ScanProgress
+    let cancel: () -> Void
+
     var body: some View {
-        VStack(spacing: 12) {
-            ProgressView()
-                .controlSize(.large)
-            Text("Scanning hidden storage")
-                .font(.headline)
-            Text("Large folders can take a minute. nomospace is measuring real disk usage and classifying known storage patterns.")
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 12) {
+                ProgressView()
+                    .controlSize(.large)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(progress.phase)
+                        .font(.headline)
+                    Text("\(progress.scannedItems) paths checked · \(progress.foundItems) findings")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Cancel", action: cancel)
+            }
+
+            if !progress.currentPath.isEmpty {
+                Text(progress.currentPath)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+
+            Text("Large folders can take a minute. Results are classified by known storage patterns and then grouped by cleanup risk.")
+                .font(.callout)
                 .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, minHeight: 220)
+        .padding(18)
+        .frame(maxWidth: .infinity, minHeight: 180, alignment: .leading)
         .panel()
     }
 }
 
 private struct EmptyState: View {
+    let didCancel: Bool
     let runAudit: () -> Void
+    let openFullDiskAccess: () -> Void
 
     var body: some View {
         VStack(spacing: 14) {
             Image(systemName: "externaldrive")
                 .font(.system(size: 44))
                 .foregroundStyle(.secondary)
-            Text("No findings yet")
+            Text(didCancel ? "Audit canceled" : "Ready to audit this Mac")
                 .font(.headline)
-            Text("Run a storage audit to find hidden app-generated storage and cleanup candidates.")
+            Text(didCancel ? "Run the audit again when you are ready." : "Run a storage audit to find hidden app-generated storage. Grant Full Disk Access first for the most complete results.")
                 .foregroundStyle(.secondary)
-            Button("Run Storage Audit", action: runAudit)
-                .buttonStyle(.borderedProminent)
+            HStack {
+                Button("Open Full Disk Access", action: openFullDiskAccess)
+                Button("Run Storage Audit", action: runAudit)
+                    .buttonStyle(.borderedProminent)
+            }
         }
         .frame(maxWidth: .infinity, minHeight: 260)
+        .panel()
+    }
+}
+
+private struct ScanIssuesPanel: View {
+    let issues: [ScanIssue]
+    let openFullDiskAccess: () -> Void
+    let dismiss: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("\(issues.count) path(s) were skipped", systemImage: "exclamationmark.triangle")
+                    .font(.headline)
+                    .foregroundStyle(AppTheme.amber)
+                Spacer()
+                Button("Dismiss", action: dismiss)
+                    .buttonStyle(.plain)
+            }
+
+            Text("This usually means macOS blocked access. Grant Full Disk Access for a more complete audit; if nomospace is not listed, drag the app into the Full Disk Access list.")
+                .foregroundStyle(.secondary)
+
+            ForEach(issues.prefix(3)) { issue in
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(issue.path)
+                        .font(.caption)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Text(issue.message)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Button("Open Full Disk Access", action: openFullDiskAccess)
+        }
+        .padding(14)
         .panel()
     }
 }

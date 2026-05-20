@@ -8,9 +8,9 @@ struct SelectionBar: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("\(viewModel.selectedIDs.count) item(s) selected")
                     .font(.headline)
-                Text("\(viewModel.selectedBytes.storageString) estimated reclaim")
+                Text(selectionSubtitle)
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(viewModel.hasRiskySelection ? AppTheme.amber : .secondary)
             }
 
             Spacer()
@@ -36,12 +36,20 @@ struct SelectionBar: View {
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .shadow(color: .black.opacity(0.12), radius: 18, y: 8)
     }
+
+    private var selectionSubtitle: String {
+        if viewModel.hasRiskySelection {
+            return "\(viewModel.selectedBytes.storageString) selected · includes Review item(s)"
+        }
+        return "\(viewModel.selectedBytes.storageString) estimated reclaim"
+    }
 }
 
 struct CleanupConfirmationView: View {
     let draft: CleanupDraft
     let cancel: () -> Void
     let confirm: () -> Void
+    @State private var confirmedReviewRisk = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -71,11 +79,16 @@ struct CleanupConfirmationView: View {
             }
 
             if draft.hasReviewItems {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .foregroundStyle(AppTheme.amber)
-                    Text("One or more selected items are marked Review. Confirm you understand they may contain app state, browser data, or local content.")
-                        .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundStyle(AppTheme.amber)
+                        Text("One or more selected items are marked Review. They may contain app state, browser data, or local content.")
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Toggle("I reviewed these paths and understand the side effects.", isOn: $confirmedReviewRisk)
+                        .toggleStyle(.checkbox)
                 }
                 .padding(12)
                 .panel()
@@ -121,6 +134,7 @@ struct CleanupConfirmationView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
+                .disabled(draft.hasReviewItems && !confirmedReviewRisk)
             }
         }
         .padding(24)
