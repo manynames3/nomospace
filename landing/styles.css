@@ -1,0 +1,544 @@
+:root {
+  color-scheme: light;
+  --ink: #172033;
+  --muted: #5b6575;
+  --line: #d9e0e8;
+  --paper: #ffffff;
+  --soft: #f4f7f8;
+  --blue: #0f4f9a;
+  --blue-dark: #092d5f;
+  --green: #16764b;
+  --amber: #a55f08;
+  --coral: #bb4d3e;
+  --shadow: 0 20px 60px rgba(20, 30, 45, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 72px;
+  padding: 14px clamp(20px, 4vw, 56px);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+}
+
+.brand,
+.site-header nav,
+.hero-actions,
+.hero-metrics,
+.footer-inner {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  gap: 10px;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.brand img {
+  border-radius: 8px;
+}
+
+.site-header nav {
+  gap: 22px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.site-header nav a:hover {
+  color: var(--ink);
+}
+
+.nav-cta {
+  padding: 9px 13px;
+  color: #fff;
+  background: var(--blue);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hero {
+  min-height: clamp(560px, 72svh, 760px);
+  display: grid;
+  align-items: center;
+  background-image:
+    linear-gradient(90deg, rgba(11, 22, 38, 0.92) 0%, rgba(11, 22, 38, 0.82) 43%, rgba(11, 22, 38, 0.2) 100%),
+    url("/assets/nomospace-hero-preview.png");
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+}
+
+.hero-inner,
+.section-inner {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.hero-inner {
+  max-width: 720px;
+  margin-left: clamp(20px, 8vw, 108px);
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero .eyebrow {
+  color: #8ee0b4;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 16px;
+  font-size: 72px;
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+h2 {
+  margin-bottom: 16px;
+  font-size: 38px;
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+h3 {
+  margin-bottom: 8px;
+  font-size: 19px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.hero-copy {
+  max-width: 650px;
+  margin-bottom: 28px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 21px;
+}
+
+.hero-actions {
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 34px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 760;
+}
+
+.button.primary {
+  color: #fff;
+  background: var(--blue);
+  box-shadow: 0 10px 24px rgba(15, 79, 154, 0.22);
+}
+
+.button.secondary {
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.button.full {
+  width: 100%;
+}
+
+.hero-metrics {
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.hero-metrics div {
+  min-width: 150px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-metrics dt {
+  font-weight: 800;
+}
+
+.hero-metrics dd {
+  margin: 2px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+}
+
+.proof-band {
+  background: var(--blue-dark);
+  color: #fff;
+}
+
+.proof-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  padding: 0;
+}
+
+.proof-grid span {
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.section {
+  padding: 88px 0;
+}
+
+.section.alt {
+  background: var(--soft);
+}
+
+.split,
+.feature-layout,
+.pricing-layout,
+.comparison {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.body-copy,
+.section p,
+.check-list {
+  color: var(--muted);
+}
+
+.body-copy {
+  font-size: 18px;
+}
+
+.section-heading {
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+.steps,
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.trust-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.steps article,
+.trust-grid article,
+.pricing-card,
+.comparison-table,
+details {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.steps article,
+.trust-grid article {
+  padding: 22px;
+}
+
+.step-number {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 18px;
+  color: #fff;
+  background: var(--blue);
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.product-shot img {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.check-list {
+  display: grid;
+  gap: 14px;
+  padding: 0;
+  list-style: none;
+  font-size: 17px;
+}
+
+.check-list li {
+  padding-left: 28px;
+  background: linear-gradient(var(--green), var(--green)) left 0.75em / 13px 2px no-repeat;
+}
+
+.comparison-table {
+  overflow: hidden;
+}
+
+.comparison-table div {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.45fr) minmax(0, 1fr);
+  gap: 18px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.comparison-table div:last-child {
+  border-bottom: 0;
+}
+
+.comparison-table span {
+  color: var(--muted);
+}
+
+.highlight-row {
+  background: #eef7f2;
+}
+
+.pricing-card {
+  max-width: 430px;
+  justify-self: end;
+  padding: 26px;
+  box-shadow: var(--shadow);
+}
+
+.plan {
+  margin-bottom: 6px;
+  color: var(--green);
+  font-weight: 800;
+}
+
+.price {
+  margin-bottom: 0;
+  color: var(--ink);
+  font-size: 56px;
+  line-height: 1;
+  font-weight: 820;
+}
+
+.price-note {
+  margin-bottom: 22px;
+}
+
+.pricing-card ul {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 24px;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+details {
+  padding: 18px 20px;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+details p {
+  margin: 12px 0 0;
+}
+
+.final-cta {
+  padding: 72px 0;
+  color: #fff;
+  background: var(--blue-dark);
+}
+
+.final-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.final-inner h2 {
+  margin-bottom: 8px;
+}
+
+.final-inner p {
+  margin-bottom: 0;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+footer {
+  padding: 24px 0;
+  color: var(--muted);
+  background: #101622;
+}
+
+.footer-inner {
+  justify-content: space-between;
+  gap: 18px;
+  font-size: 14px;
+}
+
+@media (max-width: 920px) {
+  .site-header nav {
+    display: none;
+  }
+
+  .hero {
+    min-height: 520px;
+    background-position: center right 34%;
+  }
+
+  h1 {
+    font-size: 56px;
+  }
+
+  h2 {
+    font-size: 31px;
+  }
+
+  .proof-grid,
+  .steps,
+  .trust-grid,
+  .split,
+  .feature-layout,
+  .pricing-layout,
+  .comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-card {
+    max-width: none;
+    justify-self: stretch;
+  }
+
+  .final-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 620px) {
+  .site-header {
+    min-height: 64px;
+    padding: 12px 16px;
+  }
+
+  .brand span {
+    font-size: 15px;
+  }
+
+  .nav-cta {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .hero {
+    min-height: 490px;
+    background-image:
+      linear-gradient(90deg, rgba(11, 22, 38, 0.95) 0%, rgba(11, 22, 38, 0.9) 100%),
+      url("/assets/nomospace-hero-preview.png");
+    background-position: center right 42%;
+  }
+
+  .hero-inner,
+  .section-inner {
+    width: min(100% - 32px, 1180px);
+  }
+
+  .hero-inner {
+    margin-left: 16px;
+  }
+
+  h1 {
+    font-size: 45px;
+  }
+
+  h2 {
+    font-size: 28px;
+  }
+
+  .hero-copy,
+  .body-copy {
+    font-size: 17px;
+  }
+
+  .hero-copy {
+    max-width: 340px;
+  }
+
+  .hero-metrics div {
+    min-width: 135px;
+  }
+
+  .section {
+    padding: 64px 0;
+  }
+
+  .proof-grid span {
+    padding: 14px;
+  }
+
+  .comparison-table div {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}

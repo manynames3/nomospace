@@ -65,6 +65,17 @@ scripts/test.sh
 
 The smoke test builds the app, validates packaging metadata, validates the bundled rule JSON, and runs the app's `--self-test` mode to confirm the cleanup rule library is available at runtime.
 
+## Sales landing page
+
+The static sales page lives in `landing/` and is deployed to Cloudflare Pages.
+
+```sh
+cd nomospace
+swift scripts/make-landing-assets.swift
+python3 -m http.server 8788 -d landing
+wrangler pages deploy landing --project-name nomospace --branch main
+```
+
 ## Demo flow
 
 1. Launch the app.
