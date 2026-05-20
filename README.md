@@ -11,7 +11,7 @@ It finds hidden app-generated storage, explains what created it, labels cleanup 
 **Status:** direct-download evaluation beta, not notarized for public paid distribution yet  
 **Platform:** macOS 14+, SwiftUI, local-first
 
-![nomospace storage audit preview](landing/assets/nomospace-report-preview.png)
+![nomospace evaluation mode showing storage findings, reclaimable space, and locked cleanup actions](docs/assets/nomospace-evaluation-mode.png)
 
 ## Product promise
 
