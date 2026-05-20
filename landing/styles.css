@@ -436,8 +436,7 @@ h3 {
 .workflow-grid article,
 .trust-grid article,
 .pricing-card,
-.comparison-table,
-details {
+.comparison-table {
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.035);
@@ -608,25 +607,6 @@ details {
   gap: 10px;
   margin: 0 0 26px;
   padding-left: 20px;
-}
-
-.faq-list {
-  display: grid;
-  gap: 12px;
-}
-
-details {
-  padding: 20px 22px;
-}
-
-summary {
-  cursor: pointer;
-  color: var(--cream);
-  font-weight: 850;
-}
-
-details p {
-  margin: 12px 0 0;
 }
 
 .final-cta {
