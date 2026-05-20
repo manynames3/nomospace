@@ -441,9 +441,15 @@ private struct FindingsToolbar: View {
                 .disabled(viewModel.selectedIDs.isEmpty)
 
                 Button {
-                    viewModel.exportAuditReport()
+                    viewModel.copySharableLink()
                 } label: {
-                    Label("Export Report", systemImage: "square.and.arrow.up")
+                    Label("Sharable Link", systemImage: "link")
+                }
+
+                Button {
+                    viewModel.savePDFReport()
+                } label: {
+                    Label("Save PDF", systemImage: "doc.richtext")
                 }
                 .disabled(viewModel.findings.isEmpty || viewModel.isScanning)
             }

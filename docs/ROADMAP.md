@@ -8,7 +8,7 @@ This product should stay narrow: explain hidden Mac storage and make cleanup saf
 - Risk-labeled findings.
 - Trash-first cleanup.
 - Local cleanup history.
-- Exportable Markdown audit report.
+- Sharable Link and Save PDF report actions.
 - Static sales page.
 
 ## Before first paid users
@@ -24,7 +24,7 @@ This product should stay narrow: explain hidden Mac storage and make cleanup saf
 - Expanded rule library.
 - In-app update mechanism.
 - Better before/after comparison.
-- Optional report export formats beyond Markdown.
+- Optional report destinations beyond local PDF.
 
 ## Avoid
 

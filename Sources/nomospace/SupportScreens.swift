@@ -143,11 +143,11 @@ struct AboutScreen: View {
                         detail: "Audit, risk labels, selectable cleanup, Trash-first execution, and local history are implemented."
                     )
                     AboutStatusRow(
-                        title: "Exportable audit report",
+                        title: "PDF audit report",
                         status: viewModel.findings.isEmpty ? "Run audit first" : "Ready",
                         symbol: viewModel.findings.isEmpty ? "doc.badge.clock" : "checkmark.circle",
                         tint: viewModel.findings.isEmpty ? AppTheme.amber : AppTheme.green,
-                        detail: "Reports can be saved as Markdown for customer support, family tech help, or before/after proof."
+                        detail: "Reports can be saved as PDF for customer support, family tech help, or before/after proof."
                     )
                     AboutStatusRow(
                         title: "Rule library",
@@ -167,9 +167,15 @@ struct AboutScreen: View {
 
                 HStack {
                     Button {
-                        viewModel.exportAuditReport()
+                        viewModel.copySharableLink()
                     } label: {
-                        Label("Export Audit Report", systemImage: "square.and.arrow.up")
+                        Label("Sharable Link", systemImage: "link")
+                    }
+
+                    Button {
+                        viewModel.savePDFReport()
+                    } label: {
+                        Label("Save PDF", systemImage: "doc.richtext")
                     }
                     .disabled(viewModel.findings.isEmpty)
 

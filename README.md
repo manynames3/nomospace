@@ -31,7 +31,7 @@ Apple Storage can show that `System Data` is huge, but it rarely tells users wha
 - Searches and filters findings by source, path, category, and risk.
 - Moves selected items to macOS Trash first.
 - Keeps a local cleanup receipt on the Mac.
-- Exports a local Markdown audit report.
+- Provides a sharable landing-page link and saves a local PDF audit report.
 - Shows skipped paths so users know when Full Disk Access may be needed.
 
 ## What it does not do
@@ -59,7 +59,7 @@ docs/                     Product scope and sellable-MVP notes
 - **Explain:** show size, exact path, category, risk, cause, and side effect.
 - **Select:** auto-select only `Safe` and `Usually Safe` findings.
 - **Clean:** move selected items to macOS Trash first.
-- **Report:** export a local Markdown audit report for support or before/after proof.
+- **Report:** copy a sharable product link or save a local PDF audit report for support or before/after proof.
 
 ## Run locally
 
@@ -116,7 +116,7 @@ wrangler pages deploy landing --project-name nomospace --branch main
 4. Run Storage Audit.
 5. Search or filter findings.
 6. Expand a finding to see path, source, risk rule, and side effect.
-7. Export the audit report if the user wants a shareable receipt before cleanup.
+7. Use `Sharable Link` or `Save PDF` if the user wants proof before cleanup.
 8. Select only `Safe` or `Usually Safe` items for the demo.
 9. Click `Move to Trash`.
 10. Open `History` to see the local cleanup receipt.
@@ -126,7 +126,7 @@ wrangler pages deploy landing --project-name nomospace --branch main
 The most realistic first paid offer is a simple utility purchase:
 
 - Free: scan, top findings, risk explanations.
-- Paid unlock: move to Trash, cleanup history, expanded rule library, exportable audit report.
+- Paid unlock: move to Trash, cleanup history, expanded rule library, Save PDF.
 - Suggested beta price: $19 one-time for early adopters.
 - Later price: $29-$39 one-time or annual updates for the rule library.
 

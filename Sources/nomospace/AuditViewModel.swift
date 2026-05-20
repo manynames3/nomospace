@@ -196,40 +196,49 @@ final class AuditViewModel: ObservableObject {
         }
     }
 
-    func exportAuditReport() {
+    func copySharableLink() {
+        let url = "https://nomospace.pages.dev"
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(url, forType: .string)
+        reportExportResult = ReportExportResult(
+            title: "Sharable Link Copied",
+            message: "Copied \(url)."
+        )
+    }
+
+    func savePDFReport() {
         guard !findings.isEmpty else {
             reportExportResult = ReportExportResult(
-                title: "No Report to Export",
-                message: "Run a storage audit before exporting a report."
+                title: "No PDF to Save",
+                message: "Run a storage audit before saving a PDF report."
             )
             return
         }
 
         let panel = NSSavePanel()
-        panel.title = "Export nomospace Audit Report"
-        panel.nameFieldStringValue = "nomospace-audit-report.md"
+        panel.title = "Save nomospace Audit PDF"
+        panel.nameFieldStringValue = "nomospace-audit-report.pdf"
         panel.canCreateDirectories = true
-        panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
+        panel.allowedContentTypes = [.pdf]
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
-        let report = AuditReport.render(
-            findings: findings,
-            issues: scanIssues,
-            lastScanDate: lastScanDate,
-            ruleCount: ruleCount,
-            historyRecords: historyRecords
-        )
-
         do {
-            try report.write(to: url, atomically: true, encoding: .utf8)
+            try AuditReport.writePDF(
+                findings: findings,
+                issues: scanIssues,
+                lastScanDate: lastScanDate,
+                ruleCount: ruleCount,
+                historyRecords: historyRecords,
+                to: url
+            )
             reportExportResult = ReportExportResult(
-                title: "Report Exported",
+                title: "PDF Saved",
                 message: "Saved \(url.lastPathComponent)."
             )
         } catch {
             reportExportResult = ReportExportResult(
-                title: "Export Failed",
+                title: "Save Failed",
                 message: error.localizedDescription
             )
         }

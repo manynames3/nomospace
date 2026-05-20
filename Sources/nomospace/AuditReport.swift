@@ -1,3 +1,5 @@
+import AppKit
+import CoreText
 import Foundation
 
 enum AuditReport {
@@ -98,10 +100,95 @@ enum AuditReport {
         return lines.joined(separator: "\n")
     }
 
+    static func writePDF(
+        findings: [StorageFinding],
+        issues: [ScanIssue],
+        lastScanDate: Date?,
+        ruleCount: Int,
+        historyRecords: [CleanupHistoryRecord],
+        to url: URL
+    ) throws {
+        let report = render(
+            findings: findings,
+            issues: issues,
+            lastScanDate: lastScanDate,
+            ruleCount: ruleCount,
+            historyRecords: historyRecords
+        )
+        let data = try pdfData(from: report)
+        try data.write(to: url, options: .atomic)
+    }
+
     private static let dateTimeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter
     }()
+
+    private static func pdfData(from report: String) throws -> Data {
+        let pageRect = CGRect(x: 0, y: 0, width: 612, height: 792)
+        let margin: CGFloat = 48
+        let data = NSMutableData()
+
+        guard let consumer = CGDataConsumer(data: data as CFMutableData),
+              let context = CGContext(consumer: consumer, mediaBox: nil, nil) else {
+            throw ReportRenderError.couldNotCreatePDF
+        }
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 3
+
+        let attributedReport = NSAttributedString(
+            string: report,
+            attributes: [
+                .font: NSFont.monospacedSystemFont(ofSize: 10.5, weight: .regular),
+                .foregroundColor: NSColor.black,
+                .paragraphStyle: paragraphStyle
+            ]
+        )
+        let framesetter = CTFramesetterCreateWithAttributedString(attributedReport)
+        var currentRange = CFRange(location: 0, length: 0)
+
+        repeat {
+            context.beginPDFPage([
+                kCGPDFContextMediaBox as String: pageRect
+            ] as CFDictionary)
+            context.saveGState()
+            context.translateBy(x: 0, y: pageRect.height)
+            context.scaleBy(x: 1, y: -1)
+
+            let textRect = CGRect(
+                x: margin,
+                y: margin,
+                width: pageRect.width - margin * 2,
+                height: pageRect.height - margin * 2
+            )
+            let path = CGMutablePath()
+            path.addRect(textRect)
+
+            let frame = CTFramesetterCreateFrame(framesetter, currentRange, path, nil)
+            CTFrameDraw(frame, context)
+
+            let visibleRange = CTFrameGetVisibleStringRange(frame)
+            currentRange.location += visibleRange.length
+            context.restoreGState()
+            context.endPDFPage()
+
+            if visibleRange.length == 0 {
+                break
+            }
+        } while currentRange.location < attributedReport.length
+
+        context.closePDF()
+        return data as Data
+    }
+}
+
+private enum ReportRenderError: LocalizedError {
+    case couldNotCreatePDF
+
+    var errorDescription: String? {
+        "Could not create the PDF report."
+    }
 }

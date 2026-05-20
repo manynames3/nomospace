@@ -13,7 +13,7 @@ Find hidden Mac storage that normal cleaners miss, explain what created it, and 
 - Trash-first cleanup.
 - First-run trust and Full Disk Access guidance.
 - Cleanup receipt/history.
-- Exportable local audit report.
+- Sharable Link and local PDF audit report.
 - A bundled, testable rule library.
 
 ## Cut for now
