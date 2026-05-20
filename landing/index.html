@@ -14,107 +14,149 @@
       content="Find hidden System Data, app caches, developer artifacts, and storage bloat normal cleaners miss."
     >
     <meta property="og:type" content="website">
-    <meta property="og:image" content="/assets/nomospace-hero-preview.png">
-    <meta name="theme-color" content="#0f3f83">
+    <meta property="og:image" content="/assets/nomospace-report-preview.png">
+    <meta name="theme-color" content="#111017">
     <link rel="icon" href="/assets/nomospace-icon.png">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
     <header class="site-header">
       <a class="brand" href="#top" aria-label="nomospace home">
-        <img src="/assets/nomospace-icon.png" alt="" width="36" height="36">
-        <span>nomospace</span>
+        <span class="brand-mark">n</span>
+        <span class="brand-name">nomospace</span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#workflow">Workflow</a>
+        <a href="#solution">Solution</a>
+        <a href="#rules">Rules</a>
         <a href="#trust">Trust</a>
         <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
       </nav>
-      <a class="nav-cta" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20beta%20access">Request beta</a>
+      <div class="nav-actions">
+        <a class="button ghost small" href="https://github.com/manynames3/nomospace">GitHub</a>
+        <a class="button gold small" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20beta%20access">Request beta</a>
+      </div>
     </header>
 
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-inner">
-          <p class="eyebrow">Mac Storage Auditor</p>
-          <h1 id="hero-title">nomospace</h1>
-          <p class="hero-copy">
-            Your Mac is full. nomospace shows exactly why, then lets you move selected safe items to Trash.
-          </p>
-          <div class="hero-actions" aria-label="Primary actions">
-            <a class="button primary" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20beta%20access">Request beta access</a>
-            <a class="button secondary" href="#workflow">See how it works</a>
+          <div class="hero-copy-block">
+            <p class="pill"><span></span> Local-first Mac Storage Auditor</p>
+            <h1 id="hero-title">
+              Audit hidden Mac storage.
+              <em>Clean up confidently.</em>
+            </h1>
+            <p class="hero-copy">
+              nomospace explains the hidden System Data, app caches, developer artifacts, and photo-workflow bloat that normal storage tools miss.
+            </p>
+            <div class="hero-actions">
+              <a class="button gold" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20beta%20access">Request beta access</a>
+              <a class="button ghost" href="#solution">See the workflow</a>
+            </div>
           </div>
-          <dl class="hero-metrics" aria-label="Product promises">
-            <div>
-              <dt>Local-only</dt>
-              <dd>No uploads</dd>
+
+          <aside class="audit-panel" aria-label="nomospace audit preview">
+            <div class="panel-top">
+              <div class="file-badge">AUDIT</div>
+              <div>
+                <strong>mac_storage_audit.local</strong>
+                <span>Hidden storage findings from this Mac</span>
+              </div>
+              <p>rules loaded</p>
             </div>
-            <div>
-              <dt>Trash first</dt>
-              <dd>Reversible cleanup</dd>
+            <div class="panel-body">
+              <div class="console-line accent">SCAN known storage patterns</div>
+              <div class="console-line">-> Apple aerial wallpaper videos checked</div>
+              <div class="console-line">-> Adobe Camera Raw cache measured</div>
+              <div class="console-line">-> Xcode simulator artifacts grouped</div>
+              <div class="console-line">-> npm, pnpm, pip, and uv caches found</div>
+              <div class="console-break"></div>
+              <div class="console-line green">RESULT 64.2 GB explained</div>
+              <div class="console-line">safe_reclaim 15.8 GB</div>
+              <div class="console-line">review_required 48.4 GB</div>
+              <div class="console-line">cleanup_mode trash_first</div>
             </div>
-            <div>
-              <dt>17 rules</dt>
-              <dd>Known hidden bloat</dd>
+            <div class="panel-footer">
+              <div>
+                <span>Safe</span>
+                <strong>15.8 GB</strong>
+              </div>
+              <div>
+                <span>Review</span>
+                <strong>48.4 GB</strong>
+              </div>
+              <div>
+                <span>Rules</span>
+                <strong>17</strong>
+              </div>
             </div>
-          </dl>
+          </aside>
         </div>
       </section>
 
-      <section class="proof-band" aria-label="Storage types nomospace can explain">
-        <div class="section-inner proof-grid">
-          <span>Apple aerial wallpaper videos</span>
-          <span>Adobe Camera Raw caches</span>
-          <span>Xcode and simulator artifacts</span>
-          <span>npm, pnpm, pip, and uv caches</span>
-        </div>
+      <section class="proof-strip" aria-label="Storage types nomospace can explain">
+        <span>Apple aerial wallpaper videos</span>
+        <span>Adobe Camera Raw caches</span>
+        <span>Xcode and simulator artifacts</span>
+        <span>npm, pnpm, pip, and uv caches</span>
       </section>
 
-      <section class="section" id="pain">
+      <section class="section problem">
         <div class="section-inner split">
           <div>
-            <p class="eyebrow">Why Mac storage feels broken</p>
-            <h2>Apple Storage tells you the category. It rarely tells you the cause.</h2>
+            <p class="eyebrow">The storage problem</p>
+            <h2>Macs run out of space long before users know what is safe to remove.</h2>
           </div>
           <div class="body-copy">
             <p>
-              The painful part is not seeing that System Data is huge. The painful part is knowing what is safe to remove.
-              nomospace turns hidden Library folders, app caches, and developer artifacts into plain-English findings with risk labels.
+              Apple Storage can say that System Data is huge. It rarely explains which Library folder, tool cache, app resource, or generated artifact is responsible. nomospace turns that uncertainty into a short, risk-labeled cleanup plan.
             </p>
           </div>
         </div>
       </section>
 
-      <section class="section alt" id="workflow">
+      <section class="section" id="solution">
         <div class="section-inner">
           <div class="section-heading">
-            <p class="eyebrow">Workflow</p>
-            <h2>Audit first. Explain clearly. Move to Trash only when selected.</h2>
+            <p class="eyebrow">Solution</p>
+            <h2>One workflow between hidden storage and safe cleanup.</h2>
           </div>
-          <div class="steps">
+          <div class="workflow-grid">
             <article>
-              <span class="step-number">1</span>
-              <h3>Run a storage audit</h3>
-              <p>nomospace scans high-signal hidden-storage locations and flags skipped paths when macOS blocks access.</p>
+              <span>01</span>
+              <h3>Audit known bloat</h3>
+              <p>Scan high-signal hidden-storage locations, large app folders, and common creator/developer caches.</p>
             </article>
             <article>
-              <span class="step-number">2</span>
-              <h3>Review risk labels</h3>
-              <p>Safe, Usually Safe, Review, and Protected labels explain what each item is and what may happen if removed.</p>
+              <span>02</span>
+              <h3>Explain risk</h3>
+              <p>Each finding shows the path, source, cleanup label, and what may happen if the item is removed.</p>
             </article>
             <article>
-              <span class="step-number">3</span>
-              <h3>Move selected items</h3>
-              <p>Cleanup moves files to macOS Trash first and keeps a local receipt. You empty Trash later when comfortable.</p>
+              <span>03</span>
+              <h3>Move to Trash</h3>
+              <p>Selected cleanup items go to macOS Trash first. Users empty Trash later when the Mac feels stable.</p>
             </article>
           </div>
         </div>
       </section>
 
-      <section class="section">
-        <div class="section-inner feature-layout">
-          <div class="product-shot">
+      <section class="section dark-panel" id="rules">
+        <div class="section-inner product-layout">
+          <div>
+            <p class="eyebrow">Rule library</p>
+            <h2>Built around the storage folders people are afraid to touch.</h2>
+            <p class="body-copy">
+              The beta rule library focuses on high-pain Mac storage patterns: Apple system bloat, Adobe and photo caches, Xcode artifacts, browser storage, and package-manager caches.
+            </p>
+            <ul class="signal-list">
+              <li>Auto-selects only safe or usually safe findings.</li>
+              <li>Marks browser profiles and personal folders for review.</li>
+              <li>Exports a local Markdown audit report before cleanup.</li>
+            </ul>
+          </div>
+          <figure class="product-shot">
             <img
               src="/assets/nomospace-report-preview.png"
               alt="nomospace audit report preview showing reclaimable storage, risk labels, and hidden storage findings"
@@ -122,24 +164,15 @@
               height="840"
               loading="lazy"
             >
-          </div>
-          <div>
-            <p class="eyebrow">For real cleanup decisions</p>
-            <h2>Built for the folders normal cleaners miss.</h2>
-            <ul class="check-list">
-              <li>Explains exact paths instead of hiding them behind generic storage categories.</li>
-              <li>Never auto-selects personal files, browser profiles, cloud folders, or protected app data.</li>
-              <li>Exports a Markdown audit report for family tech help, client support, or before-and-after proof.</li>
-            </ul>
-          </div>
+          </figure>
         </div>
       </section>
 
-      <section class="section alt" id="trust">
+      <section class="section" id="trust">
         <div class="section-inner">
           <div class="section-heading">
             <p class="eyebrow">Trust model</p>
-            <h2>Designed to avoid the usual cleaner-app mistakes.</h2>
+            <h2>Cleaner apps lose trust when they hide risk. nomospace puts it up front.</h2>
           </div>
           <div class="trust-grid">
             <article>
@@ -147,22 +180,22 @@
               <p>Findings, file names, paths, browser data, and cleanup history stay on the Mac.</p>
             </article>
             <article>
-              <h3>Risk-labeled by default</h3>
-              <p>Review items require extra judgment. Protected items are shown for visibility, not auto-cleanup.</p>
+              <h3>Risk labels before action</h3>
+              <p>Safe, Usually Safe, Review, and Protected labels make cleanup decisions explicit.</p>
             </article>
             <article>
-              <h3>Trash-first execution</h3>
-              <p>Selected cleanup items go to macOS Trash so the user can restore them before emptying Trash.</p>
+              <h3>Trash-first cleanup</h3>
+              <p>Selected items are moved to macOS Trash, not permanently deleted by the app.</p>
             </article>
             <article>
-              <h3>Full Disk Access clarity</h3>
-              <p>The app explains when macOS permissions limit scan accuracy and how to rerun a complete audit.</p>
+              <h3>Permission clarity</h3>
+              <p>Skipped paths are shown so users know when Full Disk Access would improve accuracy.</p>
             </article>
           </div>
         </div>
       </section>
 
-      <section class="section" id="comparison">
+      <section class="section comparison-section">
         <div class="section-inner comparison">
           <div>
             <p class="eyebrow">Positioning</p>
@@ -171,14 +204,14 @@
           <div class="comparison-table" role="table" aria-label="nomospace comparison">
             <div role="row">
               <span role="cell">Apple Storage</span>
-              <strong role="cell">Shows categories, not enough cause.</strong>
+              <strong role="cell">Shows broad categories, not enough cause.</strong>
             </div>
             <div role="row">
-              <span role="cell">Generic cleaner apps</span>
-              <strong role="cell">Often miss app-generated bloat or hide the exact path.</strong>
+              <span role="cell">Generic cleaners</span>
+              <strong role="cell">Often hide exact paths or miss app-generated bloat.</strong>
             </div>
             <div role="row">
-              <span role="cell">Manual terminal commands</span>
+              <span role="cell">Terminal commands</span>
               <strong role="cell">Powerful, but risky for non-technical users.</strong>
             </div>
             <div role="row" class="highlight-row">
@@ -189,14 +222,13 @@
         </div>
       </section>
 
-      <section class="section alt" id="pricing">
+      <section class="section pricing-section" id="pricing">
         <div class="section-inner pricing-layout">
           <div>
             <p class="eyebrow">Founding beta</p>
-            <h2>Start with one urgent Mac, not a subscription.</h2>
+            <h2>Pay for confidence, not another vague storage chart.</h2>
             <p class="body-copy">
-              The first paid version should be a simple utility purchase for people with real disk pressure.
-              Beta access is limited while the rule library is tested on more Macs.
+              The first paid version should be a simple utility purchase for people with urgent disk pressure. Beta access is limited while the rule library is tested on more real Macs.
             </p>
           </div>
           <article class="pricing-card">
@@ -210,7 +242,7 @@
               <li>Exportable audit report</li>
               <li>Rule updates through 1.0</li>
             </ul>
-            <a class="button primary full" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20founding%20beta">Request founding beta</a>
+            <a class="button gold full" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20founding%20beta">Request founding beta</a>
           </article>
         </div>
       </section>
@@ -240,9 +272,10 @@
 
       <section class="final-cta">
         <div class="section-inner final-inner">
+          <p class="eyebrow">Ready for beta users</p>
           <h2>Stop guessing what is safe to remove.</h2>
           <p>Get a local-first Mac storage audit that explains the bloat before touching it.</p>
-          <a class="button primary" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20beta%20access">Request beta access</a>
+          <a class="button gold" href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20beta%20access">Request beta access</a>
         </div>
       </section>
     </main>
@@ -250,7 +283,8 @@
     <footer>
       <div class="section-inner footer-inner">
         <span>nomospace</span>
-        <span>Local-first Mac Storage Auditor</span>
+        <a href="https://github.com/manynames3/nomospace">GitHub</a>
+        <a href="mailto:aidenrhaacloud@gmail.com?subject=nomospace%20beta%20access">Contact</a>
       </div>
     </footer>
   </body>
