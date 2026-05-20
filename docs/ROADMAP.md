@@ -9,6 +9,7 @@ This product should stay narrow: explain hidden Mac storage and make cleanup saf
 - Trash-first cleanup.
 - Local cleanup history.
 - Sharable Link and Save PDF report actions.
+- Evaluation mode with local access-code unlock.
 - Static sales page.
 
 ## Before first paid users
@@ -17,7 +18,7 @@ This product should stay narrow: explain hidden Mac storage and make cleanup saf
 - DMG or signed ZIP distribution.
 - Test on 5-10 real Macs with different user profiles.
 - Tune storage rules from real audit results.
-- Add a simple paid unlock or license flow.
+- Replace the local beta code with real per-customer payment/licensing.
 
 ## Later
 

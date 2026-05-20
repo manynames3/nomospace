@@ -13,7 +13,9 @@ test -f landing/styles.css
 test -s landing/assets/nomospace-icon.png
 test -s landing/assets/nomospace-hero-preview.png
 test -s landing/assets/nomospace-report-preview.png
-grep -q "Request beta access" landing/index.html
+test -x scripts/package-download.sh
+grep -q "Download evaluation build" landing/index.html
+grep -q "Request access code" landing/index.html
 grep -q "nomospace" landing/index.html
 
 grep -q '"id": "apple-aerial-wallpaper-videos"' Sources/nomospace/Resources/Rules/storage-rules.json

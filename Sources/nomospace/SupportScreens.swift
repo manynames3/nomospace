@@ -18,7 +18,16 @@ struct HistoryScreen: View {
                     Button("Clear History") {
                         isConfirmingClearHistory = true
                     }
-                    .disabled(viewModel.historyRecords.isEmpty)
+                    .disabled(viewModel.historyRecords.isEmpty || !viewModel.isFullVersion)
+                }
+
+                if !viewModel.isFullVersion {
+                    LockedFeaturePanel(
+                        title: "Cleanup history is a full-access feature",
+                        message: "Evaluation mode can run audits and show findings. Enter an access code to enable Trash-first cleanup and the local receipts that appear here.",
+                        primaryAction: { viewModel.requestUnlock() },
+                        secondaryAction: viewModel.openAccessCodeRequest
+                    )
                 }
 
                 SummaryMetricRow(
@@ -93,8 +102,10 @@ struct TrustGuideScreen: View {
                     )
                     GuideCard(
                         symbol: "trash",
-                        title: "Trash first",
-                        copy: "Cleanup moves items to macOS Trash. Empty Trash later when you are comfortable with the result."
+                        title: viewModel.isFullVersion ? "Trash first" : "Cleanup unlock",
+                        copy: viewModel.isFullVersion
+                            ? "Cleanup moves items to macOS Trash. Empty Trash later when you are comfortable with the result."
+                            : "Evaluation mode shows what nomospace found. Enter an access code to enable Trash-first cleanup."
                     )
                     GuideCard(
                         symbol: "folder.badge.questionmark",
@@ -133,21 +144,35 @@ struct AboutScreen: View {
                         status: "0.1.0 beta",
                         symbol: "shippingbox",
                         tint: AppTheme.accent,
-                        detail: "This build is suitable for controlled demos and beta testing."
+                        detail: "This direct-download build is suitable for controlled demos and beta testing."
                     )
                     AboutStatusRow(
-                        title: "Local scan and Trash-first cleanup",
+                        title: "Access",
+                        status: viewModel.accessStatusTitle,
+                        symbol: viewModel.isFullVersion ? "lock.open" : "lock",
+                        tint: viewModel.isFullVersion ? AppTheme.green : AppTheme.amber,
+                        detail: viewModel.accessStatusDetail
+                    )
+                    AboutStatusRow(
+                        title: "Local scan and risk labels",
                         status: "Included",
                         symbol: "checkmark.circle",
                         tint: AppTheme.green,
-                        detail: "Audit, risk labels, selectable cleanup, Trash-first execution, and local history are implemented."
+                        detail: "Evaluation mode can scan this Mac, explain findings, show exact paths, and label cleanup risk."
+                    )
+                    AboutStatusRow(
+                        title: "Trash-first cleanup",
+                        status: viewModel.isFullVersion ? "Unlocked" : "Locked",
+                        symbol: viewModel.isFullVersion ? "checkmark.circle" : "lock",
+                        tint: viewModel.isFullVersion ? AppTheme.green : AppTheme.amber,
+                        detail: "Selected cleanup items move to macOS Trash first. This requires full access."
                     )
                     AboutStatusRow(
                         title: "PDF audit report",
-                        status: viewModel.findings.isEmpty ? "Run audit first" : "Ready",
-                        symbol: viewModel.findings.isEmpty ? "doc.badge.clock" : "checkmark.circle",
-                        tint: viewModel.findings.isEmpty ? AppTheme.amber : AppTheme.green,
-                        detail: "Reports can be saved as PDF for customer support, family tech help, or before/after proof."
+                        status: viewModel.isFullVersion ? (viewModel.findings.isEmpty ? "Run audit first" : "Ready") : "Locked",
+                        symbol: viewModel.isFullVersion ? (viewModel.findings.isEmpty ? "doc.badge.clock" : "checkmark.circle") : "lock",
+                        tint: viewModel.isFullVersion ? (viewModel.findings.isEmpty ? AppTheme.amber : AppTheme.green) : AppTheme.amber,
+                        detail: "Reports can be saved as PDF for customer support, family tech help, or before/after proof. This requires full access."
                     )
                     AboutStatusRow(
                         title: "Rule library",
@@ -157,11 +182,11 @@ struct AboutScreen: View {
                         detail: "Bundled rules are validated by the app self-test and package script."
                     )
                     AboutStatusRow(
-                        title: "Public distribution",
+                        title: "Direct distribution",
                         status: "Needs notarization",
                         symbol: "seal",
                         tint: AppTheme.amber,
-                        detail: "A public paid release should be Developer ID signed, notarized, and tested on real customer Macs."
+                        detail: "A public website download should be Developer ID signed, notarized, zipped or packaged as a DMG, and tested on real customer Macs."
                     )
                 }
 
@@ -175,9 +200,17 @@ struct AboutScreen: View {
                     Button {
                         viewModel.savePDFReport()
                     } label: {
-                        Label("Save PDF", systemImage: "doc.richtext")
+                        Label("Save PDF", systemImage: viewModel.isFullVersion ? "doc.richtext" : "lock")
                     }
                     .disabled(viewModel.findings.isEmpty)
+
+                    if !viewModel.isFullVersion {
+                        Button {
+                            viewModel.requestUnlock()
+                        } label: {
+                            Label("Enter Code", systemImage: "key")
+                        }
+                    }
 
                     Button("Run Audit", action: viewModel.runAudit)
                         .buttonStyle(.borderedProminent)

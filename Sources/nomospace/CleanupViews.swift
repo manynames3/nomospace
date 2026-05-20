@@ -22,7 +22,10 @@ struct SelectionBar: View {
             Button {
                 viewModel.prepareCleanup()
             } label: {
-                Label("Move to Trash", systemImage: "trash")
+                Label(
+                    viewModel.isFullVersion ? "Move to Trash" : "Unlock Cleanup",
+                    systemImage: viewModel.isFullVersion ? "trash" : "lock"
+                )
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
@@ -38,6 +41,9 @@ struct SelectionBar: View {
     }
 
     private var selectionSubtitle: String {
+        if !viewModel.isFullVersion {
+            return "\(viewModel.selectedBytes.storageString) selected · cleanup requires access code"
+        }
         if viewModel.hasRiskySelection {
             return "\(viewModel.selectedBytes.storageString) selected · includes Review item(s)"
         }

@@ -247,6 +247,10 @@ h3 {
   flex-wrap: wrap;
 }
 
+.centered-actions {
+  justify-content: center;
+}
+
 .audit-panel {
   overflow: hidden;
   border: 1px solid var(--line);

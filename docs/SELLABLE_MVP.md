@@ -14,6 +14,7 @@ Find hidden Mac storage that normal cleaners miss, explain what created it, and 
 - First-run trust and Full Disk Access guidance.
 - Cleanup receipt/history.
 - Sharable Link and local PDF audit report.
+- Evaluation mode with local access-code unlock.
 - A bundled, testable rule library.
 
 ## Cut for now
@@ -30,5 +31,5 @@ Find hidden Mac storage that normal cleaners miss, explain what created it, and 
 - Notarize the app.
 - Ship a Developer ID signed release artifact using the bundled app icon.
 - Test on at least 5 real Macs with different user profiles.
-- Add paid unlock through StoreKit or a simple license provider.
+- Replace or harden the local beta access-code gate with a payment/licensing provider.
 - Validate exported reports with helpers/consultants who need before/after proof.

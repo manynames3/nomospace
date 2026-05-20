@@ -117,8 +117,12 @@ struct AuditScreen: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     AuditHeader(viewModel: viewModel)
+                    if !viewModel.isFullVersion {
+                        EvaluationModeBanner(viewModel: viewModel)
+                    }
                     if !hasSeenOnboarding {
                         OnboardingPanel(
+                            isFullVersion: viewModel.isFullVersion,
                             runAudit: {
                                 hasSeenOnboarding = true
                                 viewModel.runAudit()
@@ -171,6 +175,9 @@ struct AuditScreen: View {
                 cancel: { viewModel.cleanupDraft = nil },
                 confirm: viewModel.moveDraftToTrash
             )
+        }
+        .sheet(item: $viewModel.lockedFeature) { feature in
+            UnlockAccessView(viewModel: viewModel, feature: feature)
         }
         .alert(item: $viewModel.cleanupResult) { result in
             let message = result.failed.isEmpty
@@ -225,6 +232,7 @@ private struct AuditHeader: View {
 }
 
 private struct OnboardingPanel: View {
+    let isFullVersion: Bool
     let runAudit: () -> Void
     let openFullDiskAccess: () -> Void
     let dismiss: () -> Void
@@ -245,7 +253,7 @@ private struct OnboardingPanel: View {
                     Text("A storage audit, not a blind cleaner.")
                         .font(.title3)
                         .fontWeight(.semibold)
-                    Text("nomospace scans local folders, explains why storage is large, and moves selected items to Trash first. It does not upload file names, read browser passwords, or permanently delete without your action.")
+                    Text(onboardingCopy)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -253,7 +261,7 @@ private struct OnboardingPanel: View {
             HStack(spacing: 10) {
                 TrustPill(symbol: "externaldrive", title: "Find hidden System Data")
                 TrustPill(symbol: "tag", title: "Risk-labeled cleanup")
-                TrustPill(symbol: "trash", title: "Trash-first execution")
+                TrustPill(symbol: isFullVersion ? "trash" : "lock", title: isFullVersion ? "Trash-first execution" : "Access-code cleanup")
             }
 
             Text("For the most complete scan, enable Full Disk Access. If nomospace is not listed, drag the app into the Full Disk Access list, enable it, then rerun the audit.")
@@ -270,6 +278,13 @@ private struct OnboardingPanel: View {
         }
         .padding(16)
         .panel()
+    }
+
+    private var onboardingCopy: String {
+        if isFullVersion {
+            return "nomospace scans local folders, explains why storage is large, and moves selected items to Trash first. It does not upload file names, read browser passwords, or permanently delete without your action."
+        }
+        return "nomospace scans local folders and explains why storage is large. Evaluation mode shows findings for free; an access code unlocks Trash-first cleanup and PDF reports."
     }
 }
 
@@ -299,7 +314,7 @@ private struct SummaryGrid: View {
                 SummaryMetric(
                     title: "Reclaimable",
                     value: viewModel.totalReclaimableBytes.storageString,
-                    subtitle: "Items nomospace can move to Trash",
+                    subtitle: viewModel.isFullVersion ? "Items nomospace can move to Trash" : "Potential cleanup after unlock",
                     symbol: "externaldrive.badge.checkmark",
                     tint: AppTheme.accent
                 )
@@ -386,7 +401,11 @@ private struct AuditHealthStrip: View {
             HealthItem(symbol: "lock", title: "Local-only scan", tint: AppTheme.accent)
             Divider()
                 .frame(height: 20)
-            HealthItem(symbol: "trash", title: "Trash-first cleanup", tint: AppTheme.accent)
+            HealthItem(
+                symbol: viewModel.isFullVersion ? "lock.open" : "lock",
+                title: viewModel.isFullVersion ? "Full access unlocked" : "Cleanup locked",
+                tint: viewModel.isFullVersion ? AppTheme.green : AppTheme.amber
+            )
             Spacer()
             if !viewModel.scanIssues.isEmpty {
                 Text("\(viewModel.scanIssues.count) skipped path(s)")
@@ -449,9 +468,17 @@ private struct FindingsToolbar: View {
                 Button {
                     viewModel.savePDFReport()
                 } label: {
-                    Label("Save PDF", systemImage: "doc.richtext")
+                    Label("Save PDF", systemImage: viewModel.isFullVersion ? "doc.richtext" : "lock")
                 }
                 .disabled(viewModel.findings.isEmpty || viewModel.isScanning)
+
+                if !viewModel.isFullVersion {
+                    Button {
+                        viewModel.requestUnlock()
+                    } label: {
+                        Label("Enter Code", systemImage: "key")
+                    }
+                }
             }
 
             HStack(spacing: 8) {

@@ -14,19 +14,27 @@ final class AuditViewModel: ObservableObject {
     @Published var cleanupDraft: CleanupDraft?
     @Published var cleanupResult: CleanupResult?
     @Published var reportExportResult: ReportExportResult?
+    @Published var lockedFeature: LockedFeature?
+    @Published private(set) var isFullVersion: Bool
+    @Published private(set) var activatedAt: Date?
     @Published var lastScanDate: Date?
     @Published var didCancelScan = false
 
     private let scanner: StorageScanner
     private let cancellation = ScanCancellation()
+    private let licenseStore: LicenseStore
     let historyStore: HistoryStore
 
     init(
         scanner: StorageScanner = StorageScanner(),
-        historyStore: HistoryStore = HistoryStore()
+        historyStore: HistoryStore = HistoryStore(),
+        licenseStore: LicenseStore = LicenseStore()
     ) {
         self.scanner = scanner
         self.historyStore = historyStore
+        self.licenseStore = licenseStore
+        self.isFullVersion = licenseStore.isFullAccessEnabled
+        self.activatedAt = licenseStore.activatedAt
     }
 
     var ruleCount: Int {
@@ -153,6 +161,17 @@ final class AuditViewModel: ObservableObject {
         historyStore.records
     }
 
+    var accessStatusTitle: String {
+        isFullVersion ? "Full Access" : "Evaluation Mode"
+    }
+
+    var accessStatusDetail: String {
+        if isFullVersion {
+            return "Cleanup, PDF reports, and local history are unlocked on this Mac."
+        }
+        return "Audits and findings are free. Cleanup and PDF reports require an access code."
+    }
+
     func toggle(_ finding: StorageFinding) {
         guard finding.risk.canMoveToTrash else { return }
         if selectedIDs.contains(finding.id) {
@@ -175,12 +194,14 @@ final class AuditViewModel: ObservableObject {
     }
 
     func prepareCleanup() {
+        guard requireFullVersion(.cleanup) else { return }
         let selected = selectedFindings.filter(\.risk.canMoveToTrash)
         guard !selected.isEmpty else { return }
         cleanupDraft = CleanupDraft(findings: selected)
     }
 
     func moveDraftToTrash() {
+        guard requireFullVersion(.cleanup) else { return }
         guard let draft = cleanupDraft else { return }
         cleanupDraft = nil
 
@@ -214,6 +235,8 @@ final class AuditViewModel: ObservableObject {
             )
             return
         }
+
+        guard requireFullVersion(.pdf) else { return }
 
         let panel = NSSavePanel()
         panel.title = "Save nomospace Audit PDF"
@@ -254,6 +277,44 @@ final class AuditViewModel: ObservableObject {
         NSWorkspace.shared.activateFileViewerSelecting([finding.url])
     }
 
+    func requestUnlock(for feature: LockedFeature = .fullAccess) {
+        lockedFeature = feature
+    }
+
+    func dismissUnlockPrompt() {
+        lockedFeature = nil
+    }
+
+    @discardableResult
+    func activateFullVersion(code: String) -> Bool {
+        guard licenseStore.activate(code: code) else { return false }
+        isFullVersion = true
+        activatedAt = licenseStore.activatedAt
+        lockedFeature = nil
+        reportExportResult = ReportExportResult(
+            title: "Full Access Unlocked",
+            message: "Cleanup, PDF reports, and cleanup history are now enabled on this Mac."
+        )
+        return true
+    }
+
+    func openAccessCodeRequest() {
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.path = "aidenrhaacloud@gmail.com"
+        components.queryItems = [
+            URLQueryItem(name: "subject", value: "nomospace access code"),
+            URLQueryItem(
+                name: "body",
+                value: "Hi, I would like a nomospace access code for the direct-download Mac app."
+            )
+        ]
+
+        if let url = components.url {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
     private func matchesSearch(_ finding: StorageFinding) -> Bool {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !query.isEmpty else { return true }
@@ -283,6 +344,14 @@ final class AuditViewModel: ObservableObject {
         case .personal:
             finding.category == .personal || finding.category == .media
         }
+    }
+
+    private func requireFullVersion(_ feature: LockedFeature) -> Bool {
+        guard isFullVersion else {
+            lockedFeature = feature
+            return false
+        }
+        return true
     }
 }
 
