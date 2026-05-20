@@ -160,8 +160,8 @@ img {
 
 .hero-inner {
   display: grid;
-  grid-template-columns: minmax(0, 0.86fr) minmax(520px, 1fr);
-  gap: 64px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(560px, 1.1fr);
+  gap: 44px;
   align-items: center;
 }
 
@@ -204,9 +204,9 @@ h1 {
   margin-bottom: 24px;
   color: var(--cream);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(64px, 6.7vw, 96px);
+  font-size: clamp(60px, 5.8vw, 84px);
   font-weight: 500;
-  line-height: 0.9;
+  line-height: 0.92;
   letter-spacing: 0;
 }
 
@@ -249,6 +249,20 @@ h3 {
 
 .centered-actions {
   justify-content: center;
+}
+
+.hero-product-shot {
+  margin: 0;
+}
+
+.hero-product-shot img {
+  width: min(100%, 820px);
+  margin-left: auto;
+  border: 1px solid rgba(247, 240, 231, 0.18);
+  border-radius: 12px;
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.46),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .audit-panel {
@@ -619,6 +633,11 @@ footer {
 
   .audit-panel {
     max-width: 760px;
+  }
+
+  .hero-product-shot img {
+    width: min(100%, 820px);
+    margin: 0 auto;
   }
 
   .trust-grid,
