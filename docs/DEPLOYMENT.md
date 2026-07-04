@@ -16,7 +16,9 @@ scripts/package-download.sh
 open .build/release/nomospace.app
 ```
 
-The package script copies the SwiftPM resource bundle, copies the app icon, ad-hoc signs the bundle when possible, and runs the app self-test. The download script writes `.build/dist/nomospace-evaluation.zip` for GitHub Releases or website hosting.
+The package script copies the SwiftPM resource bundle, copies the app icon, ad-hoc signs the bundle when possible, and runs the app self-test. During that self-test, the build-output resource bundle is temporarily hidden so validation proves the packaged `.app` can load its own bundled `storage-rules.json` without depending on the repo's `.build` directory.
+
+The download script writes `.build/dist/nomospace-evaluation.zip` for GitHub Releases or website hosting.
 
 The app opens in evaluation mode by default. Evaluation mode can audit and show findings; full access requires a local access code.
 

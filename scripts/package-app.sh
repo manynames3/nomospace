@@ -37,6 +37,18 @@ if command -v codesign >/dev/null 2>&1; then
   fi
 fi
 
+RESOURCE_BUNDLE_BACKUP="$RESOURCE_BUNDLE.packaging-check"
+cleanup() {
+  if [ -d "$RESOURCE_BUNDLE_BACKUP" ] && [ ! -d "$RESOURCE_BUNDLE" ]; then
+    mv "$RESOURCE_BUNDLE_BACKUP" "$RESOURCE_BUNDLE"
+  fi
+}
+trap cleanup EXIT
+
+rm -rf "$RESOURCE_BUNDLE_BACKUP"
+mv "$RESOURCE_BUNDLE" "$RESOURCE_BUNDLE_BACKUP"
 "$MACOS_DIR/nomospace" --self-test >/dev/null
+mv "$RESOURCE_BUNDLE_BACKUP" "$RESOURCE_BUNDLE"
+trap - EXIT
 
 echo "$APP_DIR"

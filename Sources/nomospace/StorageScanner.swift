@@ -31,12 +31,7 @@ struct StorageRule: Codable, Identifiable, Sendable {
     }
 
     static func bundledRules() -> [StorageRule] {
-        let appBundleURL = Bundle.main.resourceURL?
-            .appendingPathComponent("nomospace_nomospace.bundle")
-            .appendingPathComponent("storage-rules.json")
-        let packageBundleURL = Bundle.module.url(forResource: "storage-rules", withExtension: "json")
-
-        guard let url = [appBundleURL, packageBundleURL].compactMap({ $0 }).first(where: {
+        guard let url = ruleFileCandidates().first(where: {
             FileManager.default.fileExists(atPath: $0.path)
         }) else { return [] }
 
@@ -46,6 +41,33 @@ struct StorageRule: Codable, Identifiable, Sendable {
         } catch {
             return []
         }
+    }
+
+    private static func ruleFileCandidates() -> [URL] {
+        var candidates: [URL] = []
+
+        if let resourceURL = Bundle.main.resourceURL {
+            candidates.append(
+                resourceURL
+                    .appendingPathComponent("nomospace_nomospace.bundle")
+                    .appendingPathComponent("storage-rules.json")
+            )
+        }
+
+        if let executableDirectory = Bundle.main.executableURL?.deletingLastPathComponent() {
+            candidates.append(
+                executableDirectory
+                    .appendingPathComponent("nomospace_nomospace.bundle")
+                    .appendingPathComponent("storage-rules.json")
+            )
+        }
+
+        candidates.append(
+            URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+                .appendingPathComponent("Sources/nomospace/Resources/Rules/storage-rules.json")
+        )
+
+        return candidates
     }
 }
 
