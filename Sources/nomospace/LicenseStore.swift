@@ -32,7 +32,8 @@ final class LicenseStore {
     }
 
     private static let acceptedCodeHashes: Set<String> = [
-        "cab4d505fc37acb76f750aaf3252bb7f45a55fa7e2da7890d0fbfdc1cd0656d1"
+        "cab4d505fc37acb76f750aaf3252bb7f45a55fa7e2da7890d0fbfdc1cd0656d1",
+        "20fbd5b61a2d4c56151430fbae312f8f000b83c6319983e06a92600f8fde55a9"
     ]
 
     private let defaults: UserDefaults
