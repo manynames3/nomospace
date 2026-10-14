@@ -4,6 +4,18 @@ import SwiftUI
 @main
 struct NomospaceApp: App {
     init() {
+        #if DEBUG
+        if CommandLine.arguments.contains("--export-preview") {
+            do {
+                try NativePreviewCapture.export(arguments: CommandLine.arguments)
+                print("Native preview screenshots exported.")
+                exit(0)
+            } catch {
+                fputs("Preview export failed: \(error)\n", stderr)
+                exit(1)
+            }
+        }
+        #endif
         if CommandLine.arguments.contains("--self-test") {
             let rules = StorageRule.bundledRules()
             let hasAerialRule = rules.contains { $0.id == "apple-aerial-wallpaper-videos" }

@@ -41,6 +41,43 @@ final class AuditViewModel: ObservableObject {
         self.diskTotalBytes = VolumeMetrics.totalBytes()
     }
 
+    #if DEBUG
+    /// Explicitly synthetic, read-only UI fixtures. Never used during a real audit.
+    func loadPreviewFixtures() {
+        let home = "/Users/demo"
+        let specimens: [(String, String, Int64, FindingCategory, RiskLevel, String)] = [
+            ("Adobe Camera Raw Cache", "Library/Caches/Adobe/CameraRaw", 14_500_000_000, .adobePhoto, .safe,
+             "Cached previews and image-processing assets from photo workflows."),
+            ("Lightroom Preview Cache", "Pictures/Lightroom/Previews", 8_280_000_000, .adobePhoto, .review,
+             "Large preview catalogs and rendered image thumbnails."),
+            ("Xcode Derived Data", "Library/Developer/Xcode/DerivedData", 12_100_000_000, .developer, .usuallySafe,
+             "Intermediate build results generated while developing applications."),
+            ("AI Model Downloads", ".cache/huggingface/hub", 21_700_000_000, .developer, .review,
+             "Locally downloaded models that may be needed offline."),
+            ("Homebrew Cache", "Library/Caches/Homebrew", 3_250_000_000, .developer, .usuallySafe,
+             "Downloaded installers and metadata for developer tools."),
+            ("Browser Site Data", "Library/Application Support/Google/Chrome", 5_600_000_000, .browser, .protected,
+             "Personal browser profiles and sign-in state, shown for visibility only.")
+        ]
+        findings = specimens.map { title, relative, size, category, risk, explanation in
+            let url = URL(fileURLWithPath: home).appendingPathComponent(relative)
+            return StorageFinding(
+                id: relative, title: title, sizeBytes: size, url: url,
+                category: category, risk: risk, explanation: explanation,
+                sideEffect: "Inspect before taking action.",
+                source: "Illustrative sample"
+            )
+        }
+        diskTotalBytes = 512_000_000_000
+        diskAvailableBytes = 186_000_000_000
+        lastScanDate = Date(timeIntervalSince1970: 1_781_200_000)
+        scanIssues = []
+        searchText = ""
+        activeFilter = .all
+        isScanning = false
+    }
+    #endif
+
     var ruleCount: Int {
         scanner.rules.count
     }

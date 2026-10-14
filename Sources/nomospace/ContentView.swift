@@ -1,9 +1,20 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel = AuditViewModel()
-    @State private var selectedSection: AppSection = .audit
+    @StateObject private var viewModel: AuditViewModel
+    @State private var selectedSection: AppSection
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    private let previewMode: Bool
+
+    init(
+        viewModel: AuditViewModel = AuditViewModel(),
+        section: AppSection = .audit,
+        previewMode: Bool = false
+    ) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _selectedSection = State(initialValue: section)
+        self.previewMode = previewMode
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -13,7 +24,7 @@ struct ContentView: View {
             Group {
                 switch selectedSection {
                 case .audit:
-                    AuditScreen(viewModel: viewModel)
+                    AuditScreen(viewModel: viewModel, previewMode: previewMode)
                 case .history:
                     HistoryScreen(viewModel: viewModel)
                 case .guide:
@@ -26,7 +37,7 @@ struct ContentView: View {
         }
         .tint(AppTheme.accent)
         .onAppear {
-            if hasSeenOnboarding && viewModel.findings.isEmpty {
+            if !previewMode && hasSeenOnboarding && viewModel.findings.isEmpty {
                 viewModel.runAudit()
             }
         }
@@ -167,6 +178,7 @@ private struct Sidebar: View {
 
 struct AuditScreen: View {
     @ObservedObject var viewModel: AuditViewModel
+    var previewMode = false
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -181,7 +193,7 @@ struct AuditScreen: View {
                             openFullDiskAccess: viewModel.openFullDiskAccessSettings,
                             dismiss: viewModel.dismissIssues
                         )
-                    } else if !hasSeenOnboarding {
+                    } else if !hasSeenOnboarding && !previewMode {
                         OnboardingPanel(
                             isFullVersion: viewModel.isFullVersion,
                             runAudit: {
