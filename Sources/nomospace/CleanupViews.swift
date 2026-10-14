@@ -6,11 +6,12 @@ struct SelectionBar: View {
     var body: some View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("\(viewModel.selectedIDs.count) item(s) selected")
-                    .font(.headline)
+                Text("\(viewModel.selectedIDs.count) selected for review")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(AppTheme.onDark)
                 Text(selectionSubtitle)
                     .font(.callout)
-                    .foregroundStyle(viewModel.hasRiskySelection ? AppTheme.amber : .secondary)
+                    .foregroundStyle(viewModel.hasRiskySelection ? Color(red: 0.95, green: 0.75, blue: 0.47) : AppTheme.onDarkMuted)
             }
 
             Spacer()
@@ -18,36 +19,36 @@ struct SelectionBar: View {
             Button("Clear") {
                 viewModel.clearSelection()
             }
+            .foregroundStyle(AppTheme.onDarkMuted)
 
             Button {
                 viewModel.prepareCleanup()
             } label: {
                 Label(
-                    viewModel.isFullVersion ? "Move to Trash" : "Unlock Cleanup",
+                    viewModel.isFullVersion ? "Review & Move to Trash…" : "Unlock Cleanup",
                     systemImage: viewModel.isFullVersion ? "trash" : "lock"
                 )
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .buttonStyle(HeroDockButtonStyle())
         }
         .padding(16)
-        .background(.ultraThinMaterial)
+        .background(AppTheme.ink)
         .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(AppTheme.border, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(AppTheme.darkLine, lineWidth: 1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .shadow(color: .black.opacity(0.12), radius: 18, y: 8)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .shadow(color: .black.opacity(0.16), radius: 16, y: 7)
     }
 
     private var selectionSubtitle: String {
         if !viewModel.isFullVersion {
-            return "\(viewModel.selectedBytes.storageString) selected · cleanup requires access code"
+            return "\(viewModel.selectedBytes.storageString) estimated contents · unlock required"
         }
         if viewModel.hasRiskySelection {
-            return "\(viewModel.selectedBytes.storageString) selected · includes Review item(s)"
+            return "\(viewModel.selectedBytes.storageString) estimated · includes Review item(s)"
         }
-        return "\(viewModel.selectedBytes.storageString) estimated contents to Trash"
+        return "\(viewModel.selectedBytes.storageString) estimated contents · space freed after Empty Trash"
     }
 }
 
@@ -62,7 +63,7 @@ struct CleanupConfirmationView: View {
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: "trash")
                     .font(.system(size: 28))
-                    .foregroundStyle(AppTheme.accent)
+                    .foregroundStyle(AppTheme.textMuted)
                     .frame(width: 44, height: 44)
                     .background(
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -78,10 +79,20 @@ struct CleanupConfirmationView: View {
                 }
             }
 
+            HStack(spacing: 8) {
+                workflowStep("1", "SELECTED", "Reviewed files")
+                Image(systemName: "arrow.right").foregroundStyle(AppTheme.textMuted)
+                workflowStep("2", "MAC TRASH", "Recoverable")
+                Image(systemName: "arrow.right").foregroundStyle(AppTheme.textMuted)
+                workflowStep("3", "EMPTY TRASH", "Frees space")
+            }
+            .padding(12)
+            .background(AppTheme.pageSecondary, in: RoundedRectangle(cornerRadius: 9))
+
             HStack(spacing: 12) {
                 ConfirmationMetric(title: "Selected", value: "\(draft.findings.count)")
                 ConfirmationMetric(title: "Estimated contents to Trash", value: draft.totalBytes.storageString)
-                ConfirmationMetric(title: "Review items", value: draft.hasReviewItems ? "Yes" : "No")
+                ConfirmationMetric(title: "Requires review", value: "\(draft.findings.filter { $0.risk == .review }.count)")
             }
 
             if draft.hasReviewItems {
@@ -138,13 +149,36 @@ struct CleanupConfirmationView: View {
                 } label: {
                     Text("Move \(draft.findings.count) Item(s) to Trash")
                 }
-                .buttonStyle(.borderedProminent)
-                .keyboardShortcut(.defaultAction)
+                .buttonStyle(BrandPrimaryButtonStyle())
                 .disabled(draft.hasReviewItems && !confirmedReviewRisk)
             }
         }
         .padding(24)
-        .frame(width: 660)
+        .frame(minWidth: 560, idealWidth: 660, maxWidth: 720)
+    }
+
+    private func workflowStep(_ number: String, _ heading: String, _ detail: String) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("\(number) / \(heading)")
+                .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                .foregroundStyle(AppTheme.textPrimary)
+            Text(detail)
+                .font(.system(size: 11))
+                .foregroundStyle(AppTheme.textMuted)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+private struct HeroDockButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(AppTheme.ink)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
+            .background(Capsule().fill(AppTheme.mint))
+            .opacity(configuration.isPressed ? 0.75 : 1)
     }
 }
 

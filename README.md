@@ -13,6 +13,8 @@ It finds hidden app-generated storage, explains what created it, labels cleanup 
 
 ![nomospace evaluation mode showing storage findings, reclaimable space, and locked cleanup actions](docs/assets/nomospace-evaluation-mode.png)
 
+See [Brand UI / UX Design System](docs/BRAND-DESIGN-SYSTEM.md) for the Supreme AI Ventures-inspired native interface.
+
 ## Product promise
 
 Apple Storage can show that `System Data` is huge, but it rarely tells users what caused it or what is safe to remove. nomospace turns hidden Library folders, app caches, and developer artifacts into plain-English findings with risk labels and Trash-first cleanup.
