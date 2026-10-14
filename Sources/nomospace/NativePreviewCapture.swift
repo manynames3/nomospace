@@ -22,18 +22,23 @@ enum NativePreviewCapture {
         preview.loadPreviewFixtures()
         try exportScreen(
             to: destination.appendingPathComponent("nomospace-audit.png"),
-            viewModel: preview, section: .audit
+            viewModel: preview, section: .audit, showTop: true
+        )
+        try exportScreen(
+            to: destination.appendingPathComponent("nomospace-findings.png"),
+            viewModel: preview, section: .audit, showTop: false
         )
         try exportScreen(
             to: destination.appendingPathComponent("nomospace-safety.png"),
-            viewModel: preview, section: .guide
+            viewModel: preview, section: .guide, showTop: true
         )
     }
 
     private static func exportScreen(
         to url: URL,
         viewModel: AuditViewModel,
-        section: AppSection
+        section: AppSection,
+        showTop: Bool
     ) throws {
         let width: CGFloat = 1280
         let height: CGFloat = 900
@@ -68,6 +73,28 @@ enum NativePreviewCapture {
         NSApplication.shared.activate(ignoringOtherApps: true)
         RunLoop.main.run(until: Date().addingTimeInterval(1.25))
         host.layoutSubtreeIfNeeded()
+
+        // Native ScrollView's initial scroll offset is undefined while an
+        // offscreen window is becoming key. Explicitly position it so the
+        // overview and guide start at the top of the visible content.
+        func scrollViews(in node: NSView) -> [NSScrollView] {
+            (node as? NSScrollView).map { [$0] } ?? []
+                + node.subviews.flatMap { scrollViews(in: $0) }
+        }
+        let scrollers = scrollViews(in: host)
+        print("Scroll views for \(section): \(scrollers.count)")
+        for scroller in scrollers {
+            guard let doc = scroller.documentView else { continue }
+            let top = doc.isFlipped
+                ? CGFloat(0)
+                : max(0, doc.bounds.height - scroller.contentView.bounds.height)
+            let bottom = doc.isFlipped
+                ? max(0, doc.bounds.height - scroller.contentView.bounds.height)
+                : CGFloat(0)
+            scroller.contentView.scroll(to: CGPoint(x: 0, y: showTop ? top : bottom))
+            scroller.reflectScrolledClipView(scroller.contentView)
+        }
+        RunLoop.main.run(until: Date().addingTimeInterval(0.35))
 
         guard let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else {
             throw Failure.emptyImage
