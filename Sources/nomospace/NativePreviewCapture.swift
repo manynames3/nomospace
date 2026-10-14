@@ -20,10 +20,12 @@ enum NativePreviewCapture {
 
         let preview = AuditViewModel()
         preview.loadPreviewFixtures()
+        preview.activeFilter = .developer
         try exportScreen(
             to: destination.appendingPathComponent("nomospace-audit.png"),
             viewModel: preview, section: .audit, showTop: true
         )
+        preview.activeFilter = .all
         try exportScreen(
             to: destination.appendingPathComponent("nomospace-findings.png"),
             viewModel: preview, section: .guide, showTop: true

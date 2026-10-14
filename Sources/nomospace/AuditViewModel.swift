@@ -42,8 +42,10 @@ final class AuditViewModel: ObservableObject {
     }
 
     #if DEBUG
+    private var previewFixturesActive = false
     /// Explicitly synthetic, read-only UI fixtures. Never used during a real audit.
     func loadPreviewFixtures() {
+        previewFixturesActive = true
         let home = "/Users/demo"
         let specimens: [(String, String, Int64, FindingCategory, RiskLevel, String)] = [
             ("Adobe Camera Raw Cache", "Library/Caches/Adobe/CameraRaw", 14_500_000_000, .adobePhoto, .safe,
@@ -97,12 +99,24 @@ final class AuditViewModel: ObservableObject {
     }
 
     var totalReclaimableBytes: Int64 {
+        #if DEBUG
+        if previewFixturesActive {
+            return findings.filter { $0.risk != .protected }
+                .reduce(0) { $0 + $1.sizeBytes }
+        }
+        #endif
         findings
             .filter { $0.risk != .protected && CleanupSafety.refusalReason(for: $0) == nil }
             .reduce(0) { $0 + $1.sizeBytes }
     }
 
     var safeBytes: Int64 {
+        #if DEBUG
+        if previewFixturesActive {
+            return findings.filter { $0.risk == .safe || $0.risk == .usuallySafe }
+                .reduce(0) { $0 + $1.sizeBytes }
+        }
+        #endif
         findings
             .filter {
                 ($0.risk == .safe || $0.risk == .usuallySafe)
