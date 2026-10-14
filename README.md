@@ -2,20 +2,27 @@
 
 **Know where your space goes.**
 
-A native, local-first macOS storage auditor that explains hidden app storage, identifies unusually large folders, and helps people make informed cleanup decisions. Findings include plain-English explanations, risk labels, and a Trash-first workflow.
+NomoSpace is a native, local-first Mac storage auditor that explains hidden app storage, surfaces large folders, and helps users review cleanup risk before moving anything to Trash.
 
-### Interface preview · Ink Ledger
+## App screenshots
 
-The upcoming interface uses the same ink, mineral, and teal design language as [Supreme AI Ventures](https://supremeaiventures.dev), adapted for a readable, native Mac application.
+These images are captures of NomoSpace's **native SwiftUI components**, with clearly labeled illustrative data. They do not display real users' files.
 
-- **Review build:** [macOS UI build and passing checks](https://github.com/manynames3/nomospace/actions/runs/38630286854) (open **Artifacts → nomospace-ui-review** to download the ad-hoc signed review ZIP, while the artifact is retained).
-- **Design specification:** [Brand UI / UX Design System](docs/BRAND-DESIGN-SYSTEM.md).
-- **Release status:** The interface redesign is in [PR #2](https://github.com/manynames3/nomospace/pull/2) and has **not** been released or merged into `main`.
-- **Current public evaluation:** [nomospace-evaluation.zip](https://github.com/manynames3/nomospace/releases/download/v0.1.0-evaluation/nomospace-evaluation.zip) uses the **earlier interface**, not the redesign.
-- **Live website:** [nomospace.pages.dev](https://nomospace.pages.dev) (currently reflects the earlier public build).
-- **Platform:** macOS 14+, SwiftUI, local-first.
+**Storage overview:** Disk capacity, estimated storage findings, risk summaries, and audit controls.
 
-An updated application screenshot will be added after the redesigned build is visually verified on a Mac. The old screenshot has been removed from this README to avoid showing it as the current proposed interface.
+![NomoSpace Ink Ledger storage dashboard, sample data](docs/assets/nomospace-audit.png)
+
+**Finding details:** Searchable, risk-labeled storage with explanations and exact paths.
+
+![NomoSpace storage findings and risk-labeled folders, sample data](docs/assets/nomospace-findings.png)
+
+## Download and status
+
+- **Current Mac beta (v0.2.0):** [Download NomoSpace evaluation ZIP](https://github.com/manynames3/nomospace/releases/download/v0.2.0-beta.1/nomospace-evaluation.zip).
+- **Platform:** macOS 14+, native SwiftUI, local-first.
+- **Signing:** This is an **ad-hoc signed, unnotarized beta** for authorized testing, not a notarized public production release. macOS Gatekeeper may block it.
+- **Website:** [nomospace.pages.dev](https://nomospace.pages.dev).
+- **Design:** [Brand UI / UX Design System](docs/BRAND-DESIGN-SYSTEM.md).
 
 ## Product promise
 

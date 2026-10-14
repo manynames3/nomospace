@@ -802,3 +802,27 @@ footer {
     padding: 16px;
   }
 }
+
+/* Native desktop previews share the ink and mineral design language. */
+.sample-caption {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.feature-capture {
+  max-width: 1040px;
+  margin: 36px auto 0;
+  padding: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.feature-capture img {
+  width: 100%;
+  border-radius: 9px;
+}
+.feature-capture figcaption {
+  padding: 0 12px 6px;
+  text-align: center;
+}
