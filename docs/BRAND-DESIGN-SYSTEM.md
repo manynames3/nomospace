@@ -46,3 +46,10 @@ This UI change deliberately does not copy homepage canvas animations into an
 audit app, does not ship the website font, and does not change the cleanup
 engine. Future iterations can add richer APFS-aware visualization after
 disk accounting is verified independently.
+
+## Reviewing the build
+
+GitHub Actions packages an **ad-hoc signed, unnotarized review ZIP** as a
+short-lived workflow artifact. This is for an authorized Mac UI review only,
+not a public release. Verify the commit and its build provenance and do not
+present the artifact as notarized production software.

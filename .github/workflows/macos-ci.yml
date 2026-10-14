@@ -17,3 +17,12 @@ jobs:
           swift --version
       - name: Safety regression and app smoke tests
         run: scripts/test.sh
+      - name: Package review-only app
+        run: scripts/package-download.sh
+      - name: Upload review ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: nomospace-ui-review
+          path: .build/dist/nomospace-evaluation.zip
+          if-no-files-found: error
+          retention-days: 7
