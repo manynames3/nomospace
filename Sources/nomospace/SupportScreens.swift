@@ -138,7 +138,7 @@ struct AboutScreen: View {
                 VStack(spacing: 12) {
                     AboutStatusRow(
                         title: "Version",
-                        status: "0.1.0 beta",
+                        status: "0.2.0 beta",
                         symbol: "shippingbox",
                         tint: AppTheme.accent,
                         detail: "This direct-download build is suitable for controlled demos and beta testing."

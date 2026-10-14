@@ -553,7 +553,6 @@ private struct SummaryMetric: View {
                     .font(.system(size: 15))
                     .foregroundStyle(tint)
             }
-            Spacer(minLength: 4)
             Text(value)
                 .font(.system(size: 26, weight: .medium))
                 .tracking(-0.65)
