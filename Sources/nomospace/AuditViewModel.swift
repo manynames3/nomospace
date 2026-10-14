@@ -105,7 +105,7 @@ final class AuditViewModel: ObservableObject {
                 .reduce(0) { $0 + $1.sizeBytes }
         }
         #endif
-        findings
+        return findings
             .filter { $0.risk != .protected && CleanupSafety.refusalReason(for: $0) == nil }
             .reduce(0) { $0 + $1.sizeBytes }
     }
@@ -117,7 +117,7 @@ final class AuditViewModel: ObservableObject {
                 .reduce(0) { $0 + $1.sizeBytes }
         }
         #endif
-        findings
+        return findings
             .filter {
                 ($0.risk == .safe || $0.risk == .usuallySafe)
                     && CleanupSafety.refusalReason(for: $0) == nil
