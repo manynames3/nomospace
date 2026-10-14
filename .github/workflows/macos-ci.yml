@@ -17,6 +17,18 @@ jobs:
           swift --version
       - name: Safety regression and app smoke tests
         run: scripts/test.sh
+      - name: Generate native SwiftUI previews
+        run: |
+          .build/debug/nomospace --export-preview .build/previews
+          test -s .build/previews/nomospace-audit.png
+          test -s .build/previews/nomospace-safety.png
+      - name: Upload preview screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: nomospace-native-previews
+          path: .build/previews/*.png
+          if-no-files-found: error
+          retention-days: 7
       - name: Package review-only app
         run: scripts/package-download.sh
       - name: Upload review ZIP
