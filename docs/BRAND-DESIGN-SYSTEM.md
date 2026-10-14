@@ -54,6 +54,9 @@ short-lived workflow artifact. This is for an authorized Mac UI review only,
 not a public release. Verify the commit and its build provenance and do not
 present the artifact as notarized production software.
 
-## README preview accuracy
+## Native UI previews
 
-The previously published evaluation screenshot depicts the earlier user interface. The redesigned app compiles and passes CI, but a fresh screenshot has not yet been captured on a Mac with an active display. Do not use the earlier image as a current UI preview. The temporary review ZIP is available from the GitHub Actions workflow artifacts.
+The README and website display two reproducible captures of the actual native
+SwiftUI components, stored under docs/assets. Both are visibly labeled SAMPLE
+DATA. The DEBUG-only preview exporter avoids scanning anyone's files. These
+captures are not a claim that the unnotarized beta has passed hands-on user QA.

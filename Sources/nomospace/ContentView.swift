@@ -1,9 +1,20 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel = AuditViewModel()
-    @State private var selectedSection: AppSection = .audit
+    @StateObject private var viewModel: AuditViewModel
+    @State private var selectedSection: AppSection
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    private let previewMode: Bool
+
+    init(
+        viewModel: AuditViewModel = AuditViewModel(),
+        section: AppSection = .audit,
+        previewMode: Bool = false
+    ) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _selectedSection = State(initialValue: section)
+        self.previewMode = previewMode
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -13,7 +24,7 @@ struct ContentView: View {
             Group {
                 switch selectedSection {
                 case .audit:
-                    AuditScreen(viewModel: viewModel)
+                    AuditScreen(viewModel: viewModel, previewMode: previewMode)
                 case .history:
                     HistoryScreen(viewModel: viewModel)
                 case .guide:
@@ -26,7 +37,7 @@ struct ContentView: View {
         }
         .tint(AppTheme.accent)
         .onAppear {
-            if hasSeenOnboarding && viewModel.findings.isEmpty {
+            if !previewMode && hasSeenOnboarding && viewModel.findings.isEmpty {
                 viewModel.runAudit()
             }
         }
@@ -167,6 +178,7 @@ private struct Sidebar: View {
 
 struct AuditScreen: View {
     @ObservedObject var viewModel: AuditViewModel
+    var previewMode = false
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -181,7 +193,7 @@ struct AuditScreen: View {
                             openFullDiskAccess: viewModel.openFullDiskAccessSettings,
                             dismiss: viewModel.dismissIssues
                         )
-                    } else if !hasSeenOnboarding {
+                    } else if !hasSeenOnboarding && !previewMode {
                         OnboardingPanel(
                             isFullVersion: viewModel.isFullVersion,
                             runAudit: {
@@ -541,7 +553,6 @@ private struct SummaryMetric: View {
                     .font(.system(size: 15))
                     .foregroundStyle(tint)
             }
-            Spacer(minLength: 4)
             Text(value)
                 .font(.system(size: 26, weight: .medium))
                 .tracking(-0.65)
@@ -791,3 +802,46 @@ private struct ScanIssuesPanel: View {
         .panel()
     }
 }
+
+#if DEBUG
+/// Screenshot composition uses the same production SwiftUI components but
+/// excludes macOS window-managed NavigationSplitView and scrolling, allowing
+/// reproducible, accessible, labeled sample-data captures on CI machines.
+struct NativePreviewLayout: View {
+    @ObservedObject var viewModel: AuditViewModel
+    let section: AppSection
+    @State private var sidebarSelection: AppSection = .audit
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Sidebar(selectedSection: $sidebarSelection)
+                .frame(width: 237)
+                .frame(maxHeight: .infinity)
+                .background(AppTheme.ink)
+
+            VStack(alignment: .leading, spacing: 14) {
+                if section == .audit {
+                    AuditHeader(viewModel: viewModel)
+                    EvaluationModeBanner(viewModel: viewModel)
+                    SummaryGrid(viewModel: viewModel)
+                    FindingsToolbar(viewModel: viewModel)
+                    FindingsList(viewModel: viewModel)
+                } else if section == .guide {
+                    EditorialPageHeading(
+                        eyebrow: "FINDINGS  /  INSPECTION",
+                        title: "Storage findings",
+                        subtitle: "Understand exactly what each app stored, how much it uses, and the cleanup risk."
+                    )
+                    FindingsToolbar(viewModel: viewModel)
+                    FindingsList(viewModel: viewModel)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(25)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(AppTheme.page)
+        }
+        .onAppear { sidebarSelection = section == .guide ? .audit : section }
+    }
+}
+#endif
