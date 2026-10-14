@@ -65,6 +65,8 @@ private struct FindingRow: View {
     let reveal: () -> Void
 
     @State private var isExpanded = false
+    @State private var isInspecting = false
+    @State private var breakdown: FolderBreakdown?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -72,12 +74,12 @@ private struct FindingRow: View {
                 Button(action: toggle) {
                     Image(systemName: checkboxSymbol)
                         .font(.system(size: 18, weight: .medium))
-                        .foregroundStyle(finding.risk.canMoveToTrash ? AppTheme.accent : .secondary)
+                        .foregroundStyle(isCleanable ? AppTheme.accent : .secondary)
                         .frame(width: 22, height: 22)
                 }
                 .buttonStyle(.plain)
-                .disabled(!finding.risk.canMoveToTrash)
-                .help(finding.risk.canMoveToTrash ? "Select for cleanup" : "Manual review only")
+                .disabled(!isCleanable)
+                .help(isCleanable ? "Select for cleanup" : "Manual review only")
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
@@ -140,6 +142,44 @@ private struct FindingRow: View {
                     DetailLine(title: "What happens if removed", value: finding.sideEffect)
                     DetailLine(title: "Source", value: finding.source)
                     DetailLine(title: "Risk rule", value: finding.risk.shortExplanation)
+                    if finding.scanIncomplete {
+                        DetailLine(title: "Scan completeness",
+                                   value: "Incomplete. Re-run the scan after granting access; cleanup is blocked.")
+                    }
+                    Button {
+                        isInspecting = true
+                        Task {
+                            breakdown = await FolderInspector.inspect(finding.url)
+                            isInspecting = false
+                        }
+                    } label: {
+                        Label(isInspecting ? "Inspecting..." : "Inspect contents",
+                              systemImage: "folder.badge.questionmark")
+                    }
+                    .disabled(isInspecting)
+                    .buttonStyle(.bordered)
+                    if let breakdown {
+                        Text("Largest inspected children (estimated allocated sizes)")
+                            .font(.caption).fontWeight(.semibold)
+                        ForEach(breakdown.children) { item in
+                            HStack {
+                                Text(item.name).lineLimit(1).truncationMode(.middle)
+                                Spacer()
+                                Text(item.sizeBytes.storageString).monospacedDigit()
+                            }
+                            .font(.caption)
+                        }
+                        if breakdown.totalChildren > breakdown.inspectedChildren {
+                            Text("Partial view: inspected \(breakdown.inspectedChildren) of \(breakdown.totalChildren) items. Other folders may be larger.")
+                                .font(.caption).foregroundStyle(.orange)
+                        }
+                        if breakdown.skippedCount > 0 {
+                            Text("\(breakdown.skippedCount) entries were inaccessible, linked, or only partially measured.")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Text("APFS clones and system snapshots can make file totals differ from recoverable disk space.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 .padding(.leading, 50)
                 .padding(.trailing, 14)
@@ -159,8 +199,12 @@ private struct FindingRow: View {
         .animation(.snappy, value: isSelected)
     }
 
+    private var isCleanable: Bool {
+        finding.risk.canMoveToTrash && CleanupSafety.refusalReason(for: finding) == nil
+    }
+
     private var checkboxSymbol: String {
-        if !finding.risk.canMoveToTrash {
+        if !isCleanable {
             return "minus.square"
         }
         return isSelected ? "checkmark.square.fill" : "square"

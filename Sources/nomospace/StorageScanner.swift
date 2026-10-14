@@ -15,7 +15,7 @@ struct StorageRule: Codable, Identifiable, Sendable {
         homeURL.appendingPathComponent(relativePath)
     }
 
-    func finding(homeURL: URL, sizeBytes: Int64) -> StorageFinding {
+    func finding(homeURL: URL, sizeBytes: Int64, scanIncomplete: Bool = false) -> StorageFinding {
         let resolvedURL = url(relativeTo: homeURL)
         return StorageFinding(
             id: resolvedURL.standardizedFileURL.path,
@@ -26,7 +26,8 @@ struct StorageRule: Codable, Identifiable, Sendable {
             risk: risk,
             explanation: explanation,
             sideEffect: sideEffect,
-            source: source
+            source: source,
+            scanIncomplete: scanIncomplete
         )
     }
 
@@ -123,7 +124,10 @@ struct StorageScanner: Sendable {
                 guard result.sizeBytes >= rule.minimumBytes else { continue }
 
                 knownExistingPaths.insert(url.standardizedFileURL.path)
-                findings.append(rule.finding(homeURL: homeURL, sizeBytes: result.sizeBytes))
+                findings.append(rule.finding(
+                    homeURL: homeURL, sizeBytes: result.sizeBytes,
+                    scanIncomplete: !result.issues.isEmpty
+                ))
             }
 
             guard !shouldCancel() else {
@@ -150,9 +154,9 @@ struct StorageScanner: Sendable {
             let caches = scanLargeChildren(
                 parent: homeURL.appendingPathComponent("Library/Caches"),
                 category: .cache,
-                risk: .safe,
+                risk: .review,
                 minimumBytes: 250.megabytes,
-                source: "User Cache",
+                source: "Unclassified User Cache",
                 knownSpecificPaths: knownExistingPaths,
                 progress: { path in emit("Scanning caches", path) },
                 shouldCancel: shouldCancel
@@ -249,10 +253,9 @@ private func scanLargeChildren(
             category: category,
             risk: risk,
             explanation: "Large storage under \(source). This may be cache, app state, local content, or downloaded resources.",
-            sideEffect: risk == .safe
-                ? "The app may rebuild these files later."
-                : "Review this path before selecting it. It may contain app state or local user data.",
-            source: source
+            sideEffect: "Unclassified folders may contain active databases, credentials, or irreplaceable app state. Inspect before removal.",
+            source: source,
+            scanIncomplete: !result.issues.isEmpty
         ))
     }
 
@@ -299,19 +302,20 @@ private func scanPersonalFolders(
             risk: risk,
             explanation: explanation,
             sideEffect: "Use Reveal in Finder and decide manually. nomospace does not auto-select personal folders.",
-            source: "Home Folder"
+            source: "Home Folder",
+            scanIncomplete: !result.issues.isEmpty
         ))
     }
 
     return ScanSectionResult(findings: findings, issues: Array(issues.prefix(30)))
 }
 
-private struct DirectorySizeResult: Sendable {
+struct DirectorySizeResult: Sendable {
     let sizeBytes: Int64
     let issues: [ScanIssue]
 }
 
-private enum DirectorySizer {
+enum DirectorySizer {
     static func allocatedSize(at url: URL) -> DirectorySizeResult {
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
@@ -349,7 +353,12 @@ private enum DirectorySizer {
         }
 
         for case let fileURL as URL in enumerator {
-            guard let values = try? fileURL.resourceValues(forKeys: Set(keys)) else { continue }
+            guard let values = try? fileURL.resourceValues(forKeys: Set(keys)) else {
+                if issues.count < 20 {
+                    issues.append(ScanIssue(path: fileURL.path, message: "Could not measure this file. Size is partial."))
+                }
+                continue
+            }
             if values.isSymbolicLink == true { continue }
             if values.isRegularFile == true {
                 total += Int64(values.totalFileAllocatedSize ?? values.fileAllocatedSize ?? 0)
@@ -394,5 +403,16 @@ private extension Array where Element == StorageFinding {
         }
 
         return selected
+    }
+}
+
+
+// Actual filesystem free-capacity reading, distinct from the sum of file sizes.
+// Neither this nor the scan's allocated-size estimates prove how much a future
+// deletion would reclaim on APFS (clones, snapshots, purgeable data).
+enum VolumeMetrics {
+    static func availableBytes(at url: URL = FileManager.default.homeDirectoryForCurrentUser) -> Int64? {
+        let keys: Set<URLResourceKey> = [.volumeAvailableCapacityForImportantUsageKey]
+        return try? url.resourceValues(forKeys: keys).volumeAvailableCapacityForImportantUsage
     }
 }

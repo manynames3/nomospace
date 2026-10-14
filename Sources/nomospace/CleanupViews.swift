@@ -47,7 +47,7 @@ struct SelectionBar: View {
         if viewModel.hasRiskySelection {
             return "\(viewModel.selectedBytes.storageString) selected · includes Review item(s)"
         }
-        return "\(viewModel.selectedBytes.storageString) estimated reclaim"
+        return "\(viewModel.selectedBytes.storageString) estimated contents to Trash"
     }
 }
 
@@ -80,7 +80,7 @@ struct CleanupConfirmationView: View {
 
             HStack(spacing: 12) {
                 ConfirmationMetric(title: "Selected", value: "\(draft.findings.count)")
-                ConfirmationMetric(title: "Estimated reclaim", value: draft.totalBytes.storageString)
+                ConfirmationMetric(title: "Estimated contents to Trash", value: draft.totalBytes.storageString)
                 ConfirmationMetric(title: "Review items", value: draft.hasReviewItems ? "Yes" : "No")
             }
 
