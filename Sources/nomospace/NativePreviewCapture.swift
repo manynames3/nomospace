@@ -51,15 +51,32 @@ enum NativePreviewCapture {
                     .padding(.top, 8)
                     .padding(.trailing, 14)
             }
-        let renderer = ImageRenderer(content: display)
-        renderer.scale = 1.5
-        guard let image = renderer.nsImage,
-              image.size.width > 1000,
-              let tiff = image.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: tiff),
-              let png = bitmap.representation(using: .png, properties: [:]) else {
+        // AppKit hosting supplies NavigationSplitView with a real NSWindow
+        // environment. ImageRenderer alone produces a placeholder for this
+        // window-dependent native navigation component on macOS.
+        let host = NSHostingView(rootView: display)
+        host.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        let window = NSWindow(
+            contentRect: CGRect(x: 0, y: 0, width: width, height: height),
+            styleMask: [.titled, .resizable, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.contentView = host
+        window.setContentSize(NSSize(width: width, height: height))
+        window.makeKeyAndOrderFront(nil)
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        RunLoop.main.run(until: Date().addingTimeInterval(1.25))
+        host.layoutSubtreeIfNeeded()
+
+        guard let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else {
             throw Failure.emptyImage
         }
+        host.cacheDisplay(in: host.bounds, to: bitmap)
+        guard let png = bitmap.representation(using: .png, properties: [:]) else {
+            throw Failure.invalidRepresentation
+        }
+        window.orderOut(nil)
         try png.write(to: url)
         print("Exported \(url.path), \(png.count) bytes")
     }
