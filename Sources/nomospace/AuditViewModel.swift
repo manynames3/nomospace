@@ -18,6 +18,7 @@ final class AuditViewModel: ObservableObject {
     @Published private(set) var isFullVersion: Bool
     @Published private(set) var activatedAt: Date?
     @Published var lastScanDate: Date?
+    @Published private(set) var diskAvailableBytes: Int64?
     @Published var didCancelScan = false
 
     private let scanner: StorageScanner
@@ -35,6 +36,7 @@ final class AuditViewModel: ObservableObject {
         self.licenseStore = licenseStore
         self.isFullVersion = licenseStore.isFullAccessEnabled
         self.activatedAt = licenseStore.activatedAt
+        self.diskAvailableBytes = VolumeMetrics.availableBytes()
     }
 
     var ruleCount: Int {
@@ -57,13 +59,16 @@ final class AuditViewModel: ObservableObject {
 
     var totalReclaimableBytes: Int64 {
         findings
-            .filter { $0.risk != .protected }
+            .filter { $0.risk != .protected && CleanupSafety.refusalReason(for: $0) == nil }
             .reduce(0) { $0 + $1.sizeBytes }
     }
 
     var safeBytes: Int64 {
         findings
-            .filter { $0.risk == .safe || $0.risk == .usuallySafe }
+            .filter {
+                ($0.risk == .safe || $0.risk == .usuallySafe)
+                    && CleanupSafety.refusalReason(for: $0) == nil
+            }
             .reduce(0) { $0 + $1.sizeBytes }
     }
 
@@ -120,6 +125,7 @@ final class AuditViewModel: ObservableObject {
             }
             scanIssues = issues
             lastScanDate = Date()
+            diskAvailableBytes = VolumeMetrics.availableBytes()
             isScanning = false
             if cancellation.isCancelled {
                 didCancelScan = true
@@ -173,7 +179,8 @@ final class AuditViewModel: ObservableObject {
     }
 
     func toggle(_ finding: StorageFinding) {
-        guard finding.risk.canMoveToTrash else { return }
+        guard finding.risk.canMoveToTrash,
+              CleanupSafety.refusalReason(for: finding) == nil else { return }
         if selectedIDs.contains(finding.id) {
             selectedIDs.remove(finding.id)
         } else {
@@ -184,7 +191,7 @@ final class AuditViewModel: ObservableObject {
     func selectSafeFindings() {
         selectedIDs = Set(
             findings
-                .filter { $0.risk.allowsDefaultSelection && $0.risk.canMoveToTrash }
+                .filter { $0.risk.allowsDefaultSelection && $0.risk.canMoveToTrash && CleanupSafety.refusalReason(for: $0) == nil }
                 .map(\.id)
         )
     }
@@ -195,7 +202,9 @@ final class AuditViewModel: ObservableObject {
 
     func prepareCleanup() {
         guard requireFullVersion(.cleanup) else { return }
-        let selected = selectedFindings.filter(\.risk.canMoveToTrash)
+        let selected = selectedFindings.filter {
+            $0.risk.canMoveToTrash && CleanupSafety.refusalReason(for: $0) == nil
+        }
         guard !selected.isEmpty else { return }
         cleanupDraft = CleanupDraft(findings: selected)
     }
@@ -208,6 +217,7 @@ final class AuditViewModel: ObservableObject {
         Task {
             let result = await TrashMover.moveToTrash(draft.findings)
             cleanupResult = result
+            diskAvailableBytes = VolumeMetrics.availableBytes()
 
             let movedIDs = Set(draft.findings.map(\.id)).subtracting(result.failed.map { $0.0.id })
             let movedFindings = draft.findings.filter { movedIDs.contains($0.id) }
@@ -387,6 +397,12 @@ private enum TrashMover {
             var reclaimed: Int64 = 0
 
             for finding in findings {
+                // Always revalidate at the deletion sink. A rule label or an earlier
+                // preview cannot make a now-unsafe or symlinked path deletable.
+                if let reason = CleanupSafety.refusalReason(for: finding, checkProcesses: true) {
+                    failed.append((finding, reason))
+                    continue
+                }
                 do {
                     var resultingURL: NSURL?
                     try fileManager.trashItem(
@@ -394,7 +410,8 @@ private enum TrashMover {
                         resultingItemURL: &resultingURL
                     )
                     movedCount += 1
-                    reclaimed += finding.sizeBytes
+                    // This is content moved, not disk space freed: Trash still uses disk.
+                reclaimed += finding.sizeBytes
                 } catch {
                     failed.append((finding, error.localizedDescription))
                 }
