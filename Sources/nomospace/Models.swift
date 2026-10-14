@@ -106,6 +106,8 @@ struct StorageFinding: Identifiable, Hashable, Sendable {
     let explanation: String
     let sideEffect: String
     let source: String
+    // A partial scan is visible but cannot be cleaned until re-scanned successfully.
+    var scanIncomplete: Bool = false
 
     var path: String { url.path }
 }
@@ -127,6 +129,8 @@ struct CleanupResult: Identifiable {
     let id = UUID()
     let movedCount: Int
     let failed: [(StorageFinding, String)]
+    // Legacy property name; this is the estimated content moved to Trash,
+    // not disk capacity already reclaimed. Kept for local-history compatibility.
     let reclaimedBytes: Int64
 }
 

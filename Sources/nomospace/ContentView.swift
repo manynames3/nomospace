@@ -181,8 +181,8 @@ struct AuditScreen: View {
         }
         .alert(item: $viewModel.cleanupResult) { result in
             let message = result.failed.isEmpty
-                ? "Moved \(result.movedCount) item(s) to Trash. Estimated reclaimed space: \(result.reclaimedBytes.storageString)."
-                : "Moved \(result.movedCount) item(s) to Trash. \(result.failed.count) item(s) failed."
+                ? "Moved \(result.movedCount) item(s) to Trash. Estimated contents moved: \(result.reclaimedBytes.storageString). Empty Trash to free space."
+                : "Moved \(result.movedCount) item(s) to Trash. \(result.failed.count) item(s) were kept safe. \(result.failed.first?.1 ?? "")"
 
             return Alert(
                 title: Text("Cleanup Finished"),
@@ -312,9 +312,9 @@ private struct SummaryGrid: View {
         Grid(horizontalSpacing: 12, verticalSpacing: 12) {
             GridRow {
                 SummaryMetric(
-                    title: "Reclaimable",
+                    title: "Potential cleanup",
                     value: viewModel.totalReclaimableBytes.storageString,
-                    subtitle: viewModel.isFullVersion ? "Items nomospace can move to Trash" : "Potential cleanup after unlock",
+                    subtitle: viewModel.isFullVersion ? "Reviewable items, not yet freed space" : "Reviewable items after unlock",
                     symbol: "externaldrive.badge.checkmark",
                     tint: AppTheme.accent
                 )
@@ -333,10 +333,10 @@ private struct SummaryGrid: View {
                     tint: AppTheme.amber
                 )
                 SummaryMetric(
-                    title: "Findings",
-                    value: "\(viewModel.findings.count)",
-                    subtitle: viewModel.lastScanDate.map { "Last scan \(Self.dateFormatter.string(from: $0))" } ?? "No scan yet",
-                    symbol: "list.bullet.rectangle",
+                    title: "Available on disk",
+                    value: viewModel.diskAvailableBytes?.storageString ?? "Unavailable",
+                    subtitle: "\(viewModel.findings.count) findings · macOS capacity estimate",
+                    symbol: "externaldrive",
                     tint: .secondary
                 )
             }

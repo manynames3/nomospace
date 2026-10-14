@@ -1,3 +1,11 @@
+## Unreleased
+
+- Hardened cleanup with protected-path, symlink, running-app and open-file checks.
+- Unknown caches now require Review, and sensitive application runtimes are protected.
+- Added storage rules, folder inspection, scan-completeness guards, and free-space reporting.
+- Corrected misleading reclaimed-space wording.
+- Added native regression tests and macOS CI.
+
 # Changelog
 
 ## 2026-07-04

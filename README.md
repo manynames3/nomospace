@@ -27,6 +27,9 @@ Apple Storage can show that `System Data` is huge, but it rarely tells users wha
 ## What it does today
 
 - Scans known hidden-storage locations and large first-level folders.
+- Provides an on-demand read-only folder breakdown with partial-result warnings.
+- Shows macOS-reported free disk capacity separately from estimated file contents.
+- Rejects sensitive, open, symlinked, or partially scanned targets before cleanup.
 - Labels findings as `Safe`, `Usually Safe`, `Review`, or `Do Not Auto-Select`.
 - Explains what each finding is and what happens if it is removed.
 - Searches and filters findings by source, path, category, and risk.
@@ -181,3 +184,5 @@ See [PRIVACY.md](PRIVACY.md).
 - Payments are not implemented yet; activation currently uses a local beta access code.
 - The rule library is bundled with the app, not remotely updated.
 - The scanner is optimized for high-signal known paths and large folders, not exhaustive file-by-file analysis.
+- File totals are estimates. APFS clones and snapshots can affect actual reclaimable space.
+- Moving items to Trash does not yet free their disk capacity.

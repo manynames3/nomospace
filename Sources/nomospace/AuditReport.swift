@@ -14,10 +14,13 @@ enum AuditReport {
         let scannedAt = lastScanDate.map(dateTimeFormatter.string) ?? "Not scanned yet"
         let sortedFindings = findings.sorted { $0.sizeBytes > $1.sizeBytes }
         let totalReclaimable = findings
-            .filter { $0.risk != .protected }
+            .filter { $0.risk != .protected && CleanupSafety.refusalReason(for: $0) == nil }
             .reduce(0) { $0 + $1.sizeBytes }
         let safeBytes = findings
-            .filter { $0.risk == .safe || $0.risk == .usuallySafe }
+            .filter {
+                ($0.risk == .safe || $0.risk == .usuallySafe)
+                    && CleanupSafety.refusalReason(for: $0) == nil
+            }
             .reduce(0) { $0 + $1.sizeBytes }
         let reviewBytes = findings
             .filter { $0.risk == .review }
@@ -40,7 +43,8 @@ enum AuditReport {
             "## Summary",
             "",
             "- Findings: \(findings.count)",
-            "- Reclaimable: \(totalReclaimable.storageString)",
+            "- Potential cleanup (not space freed): \(totalReclaimable.storageString)",
+            "- Storage totals are estimated allocated file sizes, not guaranteed APFS reclaimable bytes.",
             "- Safe / usually safe: \(safeBytes.storageString)",
             "- Review: \(reviewBytes.storageString)",
             "- Protected visibility-only: \(protectedBytes.storageString)",
@@ -88,7 +92,7 @@ enum AuditReport {
 
             for record in historyRecords.prefix(10) {
                 let date = dateTimeFormatter.string(from: record.date)
-                lines.append("- \(date): \(record.reclaimedBytes.storageString) moved to Trash across \(record.movedCount) item(s)")
+                lines.append("- \(date): \(record.reclaimedBytes.storageString) estimated contents moved to Trash across \(record.movedCount) item(s)")
             }
             lines.append("")
         }
