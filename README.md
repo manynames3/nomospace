@@ -1,19 +1,21 @@
 # nomospace
 
-**nomospace is a native Mac Storage Auditor for people whose Mac is full but Apple Storage, CleanMyMac, CCleaner, or generic disk tools did not explain the real cause.**
+**Know where your space goes.**
 
-It finds hidden app-generated storage, explains what created it, labels cleanup risk, and lets users choose what to move to Trash.
+A native, local-first macOS storage auditor that explains hidden app storage, identifies unusually large folders, and helps people make informed cleanup decisions. Findings include plain-English explanations, risk labels, and a Trash-first workflow.
 
-> Your Mac is full. nomospace shows exactly why.
+### Interface preview · Ink Ledger
 
-**Live landing page:** [nomospace.pages.dev](https://nomospace.pages.dev)  
-**Evaluation download:** [nomospace-evaluation.zip](https://github.com/manynames3/nomospace/releases/download/v0.1.0-evaluation/nomospace-evaluation.zip)  
-**Status:** direct-download evaluation beta, not notarized for public paid distribution yet  
-**Platform:** macOS 14+, SwiftUI, local-first
+The upcoming interface uses the same ink, mineral, and teal design language as [Supreme AI Ventures](https://supremeaiventures.dev), adapted for a readable, native Mac application.
 
-![nomospace evaluation mode showing storage findings, reclaimable space, and locked cleanup actions](docs/assets/nomospace-evaluation-mode.png)
+- **Review build:** [macOS UI build and passing checks](https://github.com/manynames3/nomospace/actions/runs/38630286854) (open **Artifacts → nomospace-ui-review** to download the ad-hoc signed review ZIP, while the artifact is retained).
+- **Design specification:** [Brand UI / UX Design System](docs/BRAND-DESIGN-SYSTEM.md).
+- **Release status:** The interface redesign is in [PR #2](https://github.com/manynames3/nomospace/pull/2) and has **not** been released or merged into `main`.
+- **Current public evaluation:** [nomospace-evaluation.zip](https://github.com/manynames3/nomospace/releases/download/v0.1.0-evaluation/nomospace-evaluation.zip) uses the **earlier interface**, not the redesign.
+- **Live website:** [nomospace.pages.dev](https://nomospace.pages.dev) (currently reflects the earlier public build).
+- **Platform:** macOS 14+, SwiftUI, local-first.
 
-See [Brand UI / UX Design System](docs/BRAND-DESIGN-SYSTEM.md) for the Supreme AI Ventures-inspired native interface.
+An updated application screenshot will be added after the redesigned build is visually verified on a Mac. The old screenshot has been removed from this README to avoid showing it as the current proposed interface.
 
 ## Product promise
 
@@ -112,7 +114,7 @@ cd nomospace
 scripts/test.sh
 ```
 
-The smoke test builds the app, validates packaging metadata, validates the bundled rule JSON, and runs the app's `--self-test` mode to confirm the cleanup rule library is available at runtime.
+The smoke test builds the app, validates packaging metadata and bundled rules, runs the native safety regression tests, and checks the app's `--self-test` mode. The GitHub Actions workflow also packages a temporary review build.
 
 ## Sales landing page
 
@@ -138,7 +140,7 @@ wrangler pages deploy landing --project-name nomospace --branch main
 7. In evaluation mode, click `Enter Code` or `Unlock Cleanup` to show the access-code flow.
 8. After full access is unlocked, use `Save PDF` if the user wants proof before cleanup.
 9. Select only `Safe` or `Usually Safe` items for the demo.
-10. Click `Move to Trash`.
+10. Click `Review & Move to Trash…`, review the confirmation, then choose whether to proceed.
 11. Open `History` to see the local cleanup receipt.
 
 ## Monetization direction

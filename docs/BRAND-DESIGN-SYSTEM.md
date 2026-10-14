@@ -53,3 +53,7 @@ GitHub Actions packages an **ad-hoc signed, unnotarized review ZIP** as a
 short-lived workflow artifact. This is for an authorized Mac UI review only,
 not a public release. Verify the commit and its build provenance and do not
 present the artifact as notarized production software.
+
+## README preview accuracy
+
+The previously published evaluation screenshot depicts the earlier user interface. The redesigned app compiles and passes CI, but a fresh screenshot has not yet been captured on a Mac with an active display. Do not use the earlier image as a current UI preview. The temporary review ZIP is available from the GitHub Actions workflow artifacts.
