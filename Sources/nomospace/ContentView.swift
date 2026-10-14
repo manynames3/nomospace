@@ -8,6 +8,7 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             Sidebar(selectedSection: $selectedSection)
+                .background(AppTheme.ink.ignoresSafeArea())
         } detail: {
             Group {
                 switch selectedSection {
@@ -23,6 +24,7 @@ struct ContentView: View {
             }
             .background(AppTheme.page)
         }
+        .tint(AppTheme.accent)
         .onAppear {
             if hasSeenOnboarding && viewModel.findings.isEmpty {
                 viewModel.runAudit()
@@ -53,74 +55,133 @@ private struct Sidebar: View {
     @Binding var selectedSection: AppSection
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("nomospace")
-                    .font(.system(size: 28, weight: .semibold, design: .rounded))
-                Text("Mac Storage Auditor")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 11) {
+                NomospaceMark(size: 35)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("nomospace")
+                        .font(.system(size: 19, weight: .semibold))
+                        .tracking(-0.6)
+                        .foregroundStyle(AppTheme.onDark)
+                    Text("STORAGE INTELLIGENCE")
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .tracking(1.0)
+                        .foregroundStyle(AppTheme.onDarkMuted)
+                }
             }
-            .padding(.horizontal, 18)
-            .padding(.top, 28)
+            .padding(.horizontal, 22)
+            .padding(.top, 34)
+            .padding(.bottom, 31)
+            .accessibilityElement(children: .combine)
 
-            VStack(spacing: 4) {
+            Rectangle().fill(AppTheme.darkLine)
+                .frame(height: 1)
+                .padding(.horizontal, 20)
+
+            Text("WORKSPACE")
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .tracking(1.5)
+                .foregroundStyle(AppTheme.onDarkMuted)
+                .padding(.horizontal, 23)
+                .padding(.top, 28)
+                .padding(.bottom, 12)
+
+            VStack(spacing: 5) {
                 ForEach(AppSection.allCases) { section in
+                    let isSelected = selectedSection == section
                     Button {
                         selectedSection = section
                     } label: {
-                        HStack(spacing: 10) {
+                        HStack(spacing: 12) {
+                            RoundedRectangle(cornerRadius: 1)
+                                .fill(isSelected ? AppTheme.mint : .clear)
+                                .frame(width: 3, height: 20)
                             Image(systemName: section.symbolName)
-                                .frame(width: 18)
+                                .font(.system(size: 14, weight: .medium))
+                                .frame(width: 19)
                             Text(section.rawValue)
+                                .font(.system(size: 14, weight: isSelected ? .semibold : .medium))
                             Spacer()
+                            if isSelected {
+                                Image(systemName: "arrow.up.right")
+                                    .font(.system(size: 10))
+                            }
                         }
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 9)
+                        .foregroundStyle(isSelected ? AppTheme.onDark : AppTheme.onDarkMuted)
+                        .padding(.horizontal, 11)
+                        .padding(.vertical, 11)
                         .contentShape(Rectangle())
+                        .background(
+                            RoundedRectangle(cornerRadius: 9)
+                                .fill(isSelected ? AppTheme.darkLine : .clear)
+                        )
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(selectedSection == section ? .primary : .secondary)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(selectedSection == section ? Color.primary.opacity(0.08) : .clear)
-                    )
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                    .accessibilityLabel("\(section.rawValue) section")
                 }
             }
-            .padding(.horizontal, 10)
-
-            Spacer()
-
-            VStack(alignment: .leading, spacing: 8) {
-                Label("Trash-first cleanup", systemImage: "trash")
-                Label("Risk-labeled findings", systemImage: "tag")
-                Label("Exact path evidence", systemImage: "folder.badge.questionmark")
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .padding(14)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .panel()
             .padding(.horizontal, 12)
-            .padding(.bottom, 16)
+
+            Spacer(minLength: 20)
+
+            VStack(alignment: .leading, spacing: 12) {
+                Image(systemName: "checkmark.shield")
+                    .font(.system(size: 20))
+                    .foregroundStyle(AppTheme.mint)
+                Text("Your files stay yours.")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(AppTheme.onDark)
+                Text("Local audits. Explainable findings. Nothing deleted automatically.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(AppTheme.onDarkMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(17)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(AppTheme.inkSecondary)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(AppTheme.darkLine, lineWidth: 1)
+            )
+            .padding(.horizontal, 13)
+
+            HStack {
+                Circle().fill(AppTheme.mint).frame(width: 5, height: 5)
+                Text("ON-DEVICE / MACOS")
+                    .font(.system(size: 10, design: .monospaced))
+                    .tracking(0.8)
+                    .foregroundStyle(AppTheme.onDarkMuted)
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 22)
+            .padding(.bottom, 24)
         }
-        .navigationSplitViewColumnWidth(min: 220, ideal: 240, max: 280)
+        .navigationSplitViewColumnWidth(min: 220, ideal: 237, max: 255)
     }
 }
 
 struct AuditScreen: View {
     @ObservedObject var viewModel: AuditViewModel
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: 14) {
                     AuditHeader(viewModel: viewModel)
-                    if !viewModel.isFullVersion {
-                        EvaluationModeBanner(viewModel: viewModel)
-                    }
-                    if !hasSeenOnboarding {
+                    if !viewModel.scanIssues.isEmpty {
+                        ScanIssuesPanel(
+                            issues: viewModel.scanIssues,
+                            openFullDiskAccess: viewModel.openFullDiskAccessSettings,
+                            dismiss: viewModel.dismissIssues
+                        )
+                    } else if !hasSeenOnboarding {
                         OnboardingPanel(
                             isFullVersion: viewModel.isFullVersion,
                             runAudit: {
@@ -130,17 +191,11 @@ struct AuditScreen: View {
                             openFullDiskAccess: viewModel.openFullDiskAccessSettings,
                             dismiss: { hasSeenOnboarding = true }
                         )
+                    } else if !viewModel.isFullVersion {
+                        EvaluationModeBanner(viewModel: viewModel)
                     }
                     SummaryGrid(viewModel: viewModel)
-                    AuditHealthStrip(viewModel: viewModel)
                     FindingsToolbar(viewModel: viewModel)
-                    if !viewModel.scanIssues.isEmpty {
-                        ScanIssuesPanel(
-                            issues: viewModel.scanIssues,
-                            openFullDiskAccess: viewModel.openFullDiskAccessSettings,
-                            dismiss: viewModel.dismissIssues
-                        )
-                    }
 
                     if viewModel.isScanning {
                         ScanningState(
@@ -158,17 +213,17 @@ struct AuditScreen: View {
                             .padding(.bottom, viewModel.selectedIDs.isEmpty ? 20 : 96)
                     }
                 }
-                .padding(28)
+                .padding(25)
             }
 
             if !viewModel.selectedIDs.isEmpty {
                 SelectionBar(viewModel: viewModel)
                     .padding(.horizontal, 28)
                     .padding(.bottom, 20)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .animation(.snappy, value: viewModel.selectedIDs)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: viewModel.selectedIDs)
         .sheet(item: $viewModel.cleanupDraft) { draft in
             CleanupConfirmationView(
                 draft: draft,
@@ -207,27 +262,143 @@ private struct AuditHeader: View {
     @ObservedObject var viewModel: AuditViewModel
 
     var body: some View {
-        HStack(alignment: .center, spacing: 18) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Your Mac is full. nomospace shows exactly why.")
-                    .font(.system(size: 30, weight: .semibold))
-                Text("Find hidden System Data, app caches, developer artifacts, and storage bloat normal cleaners miss.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-            }
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center, spacing: 25) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("MAC STORAGE  /  PRIVATE BY DESIGN")
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .tracking(1.3)
+                        .foregroundStyle(AppTheme.mint)
+                    Text(viewModel.lastScanDate == nil
+                         ? "See what uses your disk."
+                         : "\(viewModel.findings.count) findings. Better clarity.")
+                        .font(.system(size: 31, weight: .medium))
+                        .tracking(-0.7)
+                        .foregroundStyle(AppTheme.onDark)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Understand hidden storage, inspect each finding, and choose what is safe to move to Trash.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(AppTheme.onDarkMuted)
+                        .lineSpacing(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 465, alignment: .leading)
+                    Button {
+                        viewModel.runAudit()
+                    } label: {
+                        Label(viewModel.isScanning ? "Scanning…" : "Run storage audit",
+                              systemImage: "arrow.up.right")
+                    }
+                    .buttonStyle(HeroPrimaryButtonStyle())
+                    .disabled(viewModel.isScanning)
+                    .padding(.top, 2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-            Spacer()
-
-            Button {
-                viewModel.runAudit()
-            } label: {
-                Label(viewModel.isScanning ? "Scanning" : "Run Storage Audit", systemImage: "magnifyingglass")
-                    .frame(minWidth: 160)
+                AuditStatusRail(viewModel: viewModel)
+                    .frame(width: 189)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(viewModel.isScanning)
+            Rectangle().fill(AppTheme.darkLine).frame(height: 1)
+            DiskCapacityStrip(available: viewModel.diskAvailableBytes,
+                              total: viewModel.diskTotalBytes)
         }
+        .padding(.horizontal, 25)
+        .padding(.vertical, 20)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(AppTheme.ink)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(AppTheme.darkLine, lineWidth: 1)
+        )
+    }
+}
+
+private struct AuditStatusRail: View {
+    @ObservedObject var viewModel: AuditViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            status("RULE LIBRARY", "\(viewModel.ruleCount) rules")
+            status("SCAN", viewModel.isScanning ? "In progress" : "Local only")
+            status("ACCESS", viewModel.isFullVersion ? "Full access" : "Evaluation")
+        }
+        .padding(15)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.inkSecondary)
+        .overlay(Rectangle().strokeBorder(AppTheme.darkLine, lineWidth: 1))
+        .accessibilityElement(children: .combine)
+    }
+
+    private func status(_ key: String, _ value: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(key)
+                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                .foregroundStyle(AppTheme.onDarkMuted)
+            Spacer(minLength: 6)
+            Text(value)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(AppTheme.onDark)
+                .lineLimit(1)
+        }
+    }
+}
+
+private struct DiskCapacityStrip: View {
+    let available: Int64?
+    let total: Int64?
+
+    private var freeFraction: CGFloat? {
+        guard let available, let total, total > 0 else { return nil }
+        return CGFloat(min(max(Double(available) / Double(total), 0), 1))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 12) {
+                Text("VOLUME CAPACITY")
+                    .font(.system(size: 9, weight: .medium, design: .monospaced))
+                    .tracking(0.8)
+                    .foregroundStyle(AppTheme.onDarkMuted)
+                Spacer()
+                if let available, let total {
+                    Text("\(available.storageString) available  /  \(total.storageString) total")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundStyle(AppTheme.onDark)
+                } else {
+                    Text("Unable to read capacity")
+                        .font(.caption).foregroundStyle(AppTheme.onDarkMuted)
+                }
+            }
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Rectangle().fill(AppTheme.darkLine)
+                    if let freeFraction {
+                        Rectangle()
+                            .fill(AppTheme.mint)
+                            .frame(width: geometry.size.width * freeFraction)
+                    }
+                }
+            }
+            .frame(height: 5)
+            .accessibilityHidden(true)
+            Text("Mint = macOS-estimated available capacity. File findings are estimates, not guaranteed recoverable space.")
+                .font(.system(size: 10))
+                .foregroundStyle(AppTheme.onDarkMuted)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+private struct HeroPrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(AppTheme.ink)
+            .padding(.horizontal, 19)
+            .padding(.vertical, 12)
+            .background(Capsule().fill(AppTheme.mint))
+            .opacity(configuration.isPressed ? 0.76 : 1)
     }
 }
 
@@ -359,29 +530,32 @@ private struct SummaryMetric: View {
     let tint: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 7) {
             HStack {
+                Text(title.uppercased())
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .tracking(0.65)
+                    .foregroundStyle(AppTheme.textMuted)
+                Spacer(minLength: 4)
                 Image(systemName: symbol)
-                    .font(.title3)
+                    .font(.system(size: 15))
                     .foregroundStyle(tint)
-                Spacer()
             }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(value)
-                    .font(.system(size: 25, weight: .semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.72)
-                Text(title)
-                    .font(.headline)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
+            Spacer(minLength: 4)
+            Text(value)
+                .font(.system(size: 26, weight: .medium))
+                .tracking(-0.65)
+                .monospacedDigit()
+                .foregroundStyle(AppTheme.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+            Text(subtitle)
+                .font(.system(size: 11))
+                .foregroundStyle(AppTheme.textMuted)
+                .lineLimit(2)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, minHeight: 142, alignment: .topLeading)
+        .padding(15)
+        .frame(maxWidth: .infinity, minHeight: 114, alignment: .topLeading)
         .panel()
     }
 }
@@ -435,23 +609,22 @@ private struct FindingsToolbar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
-                    TextField("Search apps, folders, file types, paths", text: $viewModel.searchText)
+                        .foregroundStyle(AppTheme.textMuted)
+                    TextField("Search findings, paths, applications", text: $viewModel.searchText)
                         .textFieldStyle(.plain)
+                        .accessibilityLabel("Search storage findings")
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 9)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(Color.primary.opacity(0.06))
-                )
+                .padding(.horizontal, 13)
+                .padding(.vertical, 10)
+                .background(AppTheme.pageSecondary, in: RoundedRectangle(cornerRadius: 7))
 
-                Button("Select Safe") {
+                Button("Select safe") {
                     viewModel.selectSafeFindings()
                 }
+                .buttonStyle(BrandSecondaryButtonStyle())
                 .disabled(viewModel.findings.isEmpty)
 
                 Button("Clear") {
@@ -459,44 +632,39 @@ private struct FindingsToolbar: View {
                 }
                 .disabled(viewModel.selectedIDs.isEmpty)
 
-                Button {
-                    viewModel.copySharableLink()
-                } label: {
-                    Label("Sharable Link", systemImage: "link")
-                }
-
-                Button {
-                    viewModel.savePDFReport()
-                } label: {
-                    Label("Save PDF", systemImage: viewModel.isFullVersion ? "doc.richtext" : "lock")
-                }
-                .disabled(viewModel.findings.isEmpty || viewModel.isScanning)
-
-                if !viewModel.isFullVersion {
-                    Button {
-                        viewModel.requestUnlock()
-                    } label: {
-                        Label("Enter Code", systemImage: "key")
+                Menu {
+                    Button("Copy product link", action: viewModel.copySharableLink)
+                    Button("Save PDF report", action: viewModel.savePDFReport)
+                        .disabled(viewModel.findings.isEmpty || viewModel.isScanning)
+                    if !viewModel.isFullVersion {
+                        Button("Enter access code") { viewModel.requestUnlock() }
                     }
+                } label: {
+                    Label("More actions", systemImage: "ellipsis")
                 }
+                .accessibilityLabel("More audit actions")
             }
 
-            HStack(spacing: 8) {
-                ForEach(FindingFilter.allCases) { filter in
-                    FilterChip(
-                        title: filter.title,
-                        isActive: viewModel.activeFilter == filter
-                    ) {
-                        viewModel.activeFilter = filter
+            HStack(spacing: 10) {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(FindingFilter.allCases) { filter in
+                            FilterChip(
+                                title: filter.title,
+                                isActive: viewModel.activeFilter == filter
+                            ) {
+                                viewModel.activeFilter = filter
+                            }
+                        }
                     }
                 }
-                Spacer()
-                Text("\(viewModel.filteredFindings.count) result(s)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text("\(viewModel.filteredFindings.count) results")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(AppTheme.textMuted)
+                    .fixedSize()
             }
         }
-        .padding(14)
+        .padding(13)
         .panel()
     }
 }
@@ -509,16 +677,17 @@ private struct FilterChip: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.callout)
-                .padding(.horizontal, 11)
-                .padding(.vertical, 6)
+                .font(.system(size: 12, weight: isActive ? .semibold : .medium))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 7)
                 .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isActive ? AppTheme.accent.opacity(0.14) : Color.primary.opacity(0.06))
+                    Capsule()
+                        .fill(isActive ? AppTheme.accentSubtle : AppTheme.pageSecondary)
                 )
-                .foregroundStyle(isActive ? AppTheme.accent : .primary)
+                .foregroundStyle(isActive ? AppTheme.accent : AppTheme.textMuted)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isActive ? .isSelected : [])
     }
 }
 

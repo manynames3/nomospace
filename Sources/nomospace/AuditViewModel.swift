@@ -19,6 +19,7 @@ final class AuditViewModel: ObservableObject {
     @Published private(set) var activatedAt: Date?
     @Published var lastScanDate: Date?
     @Published private(set) var diskAvailableBytes: Int64?
+    @Published private(set) var diskTotalBytes: Int64?
     @Published var didCancelScan = false
 
     private let scanner: StorageScanner
@@ -37,6 +38,7 @@ final class AuditViewModel: ObservableObject {
         self.isFullVersion = licenseStore.isFullAccessEnabled
         self.activatedAt = licenseStore.activatedAt
         self.diskAvailableBytes = VolumeMetrics.availableBytes()
+        self.diskTotalBytes = VolumeMetrics.totalBytes()
     }
 
     var ruleCount: Int {
@@ -126,6 +128,7 @@ final class AuditViewModel: ObservableObject {
             scanIssues = issues
             lastScanDate = Date()
             diskAvailableBytes = VolumeMetrics.availableBytes()
+            diskTotalBytes = VolumeMetrics.totalBytes()
             isScanning = false
             if cancellation.isCancelled {
                 didCancelScan = true

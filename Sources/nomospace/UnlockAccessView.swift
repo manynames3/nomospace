@@ -62,7 +62,7 @@ struct UnlockAccessView: View {
                 Button("Unlock") {
                     unlock()
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(BrandPrimaryButtonStyle())
                 .keyboardShortcut(.defaultAction)
             }
         }
@@ -82,36 +82,27 @@ struct EvaluationModeBanner: View {
     @ObservedObject var viewModel: AuditViewModel
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: "lock")
-                .font(.title2)
-                .foregroundStyle(AppTheme.amber)
-                .frame(width: 38, height: 38)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(AppTheme.amber.opacity(0.12))
-                )
-
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Evaluation mode")
-                    .font(.headline)
-                Text("Run audits and inspect findings for free. Enter an access code to enable Trash-first cleanup, PDF reports, and cleanup history.")
-                    .foregroundStyle(.secondary)
+        HStack(spacing: 13) {
+            Image(systemName: "lock.shield")
+                .font(.system(size: 17))
+                .foregroundStyle(AppTheme.textMuted)
+            VStack(alignment: .leading, spacing: 3) {
+                AppTheme.eyebrow("Evaluation mode")
+                Text("Findings are free. Cleanup, reports and history require an access code.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(AppTheme.textMuted)
             }
-
-            Spacer()
-
-            Button("Request Code") {
-                viewModel.openAccessCodeRequest()
-            }
-
-            Button("Enter Code") {
-                viewModel.requestUnlock()
-            }
-            .buttonStyle(.borderedProminent)
+            Spacer(minLength: 10)
+            Button("Request code", action: viewModel.openAccessCodeRequest)
+            Button("Enter code") { viewModel.requestUnlock() }
+                .buttonStyle(BrandSecondaryButtonStyle())
         }
-        .padding(14)
-        .panel()
+        .padding(12)
+        .background(AppTheme.pageSecondary, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(AppTheme.border.opacity(0.7))
+        )
     }
 }
 
@@ -125,11 +116,11 @@ struct LockedFeaturePanel: View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: "lock")
                 .font(.title2)
-                .foregroundStyle(AppTheme.amber)
+                .foregroundStyle(AppTheme.textMuted)
                 .frame(width: 40, height: 40)
                 .background(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(AppTheme.amber.opacity(0.12))
+                        .fill(AppTheme.pageSecondary)
                 )
 
             VStack(alignment: .leading, spacing: 6) {
@@ -143,7 +134,7 @@ struct LockedFeaturePanel: View {
 
             Button("Request Code", action: secondaryAction)
             Button("Enter Code", action: primaryAction)
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(BrandPrimaryButtonStyle())
         }
         .padding(14)
         .panel()

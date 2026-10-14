@@ -27,24 +27,25 @@ private struct FindingGroup: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
+            HStack(spacing: 9) {
                 Image(systemName: category.symbolName)
                     .foregroundStyle(AppTheme.accent)
-                Text(category.title)
-                    .font(.headline)
-                Text(totalBytes.storageString)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color.primary.opacity(0.06))
-                    )
+                Text(category.title.uppercased())
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .tracking(0.8)
+                Text("· \(findings.count)")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundStyle(AppTheme.textMuted)
                 Spacer()
+                Text(totalBytes.storageString)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(AppTheme.textMuted)
             }
+            .foregroundStyle(AppTheme.textPrimary)
+            .padding(.horizontal, 4)
+            .padding(.bottom, 3)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 0) {
                 ForEach(findings) { finding in
                     FindingRow(
                         finding: finding,
@@ -52,8 +53,20 @@ private struct FindingGroup: View {
                         toggle: { viewModel.toggle(finding) },
                         reveal: { viewModel.revealInFinder(finding) }
                     )
+                    if finding.id != findings.last?.id {
+                        Rectangle()
+                            .fill(AppTheme.border.opacity(0.7))
+                            .frame(height: 1)
+                            .padding(.leading, 52)
+                    }
                 }
             }
+            .background(AppTheme.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 11))
+            .overlay(
+                RoundedRectangle(cornerRadius: 11)
+                    .strokeBorder(AppTheme.border.opacity(0.9), lineWidth: 1)
+            )
         }
     }
 }
@@ -67,6 +80,7 @@ private struct FindingRow: View {
     @State private var isExpanded = false
     @State private var isInspecting = false
     @State private var breakdown: FolderBreakdown?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -80,20 +94,22 @@ private struct FindingRow: View {
                 .buttonStyle(.plain)
                 .disabled(!isCleanable)
                 .help(isCleanable ? "Select for cleanup" : "Manual review only")
+                .accessibilityLabel(isCleanable
+                    ? "\(isSelected ? "Deselect" : "Select") \(finding.title), \(finding.sizeBytes.storageString), \(finding.risk.title)"
+                    : "\(finding.title) is inspection-only")
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text(finding.title)
                             .font(.headline)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+                            .lineLimit(2)
 
                         RiskBadge(risk: finding.risk)
 
                         Spacer()
 
                         Text(finding.sizeBytes.storageString)
-                            .font(.system(.headline, design: .rounded))
+                            .font(.system(.headline, design: .default))
                             .foregroundStyle(.primary)
                             .monospacedDigit()
                     }
@@ -107,7 +123,8 @@ private struct FindingRow: View {
                         Image(systemName: "folder")
                             .foregroundStyle(.secondary)
                         Text(finding.path)
-                            .font(.caption)
+                            .font(.system(.caption, design: .monospaced))
+                            .textSelection(.enabled)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                             .truncationMode(.middle)
@@ -123,6 +140,7 @@ private struct FindingRow: View {
                     }
                     .buttonStyle(.plain)
                     .help(isExpanded ? "Hide details" : "Show details")
+                    .accessibilityLabel("\(isExpanded ? "Collapse" : "Expand") \(finding.title) details")
 
                     Button(action: reveal) {
                         Image(systemName: "arrow.up.forward.square")
@@ -130,6 +148,7 @@ private struct FindingRow: View {
                     }
                     .buttonStyle(.plain)
                     .help("Reveal in Finder")
+                    .accessibilityLabel("Reveal \(finding.title) in Finder")
                 }
             }
             .padding(14)
@@ -171,7 +190,7 @@ private struct FindingRow: View {
                         }
                         if breakdown.totalChildren > breakdown.inspectedChildren {
                             Text("Partial view: inspected \(breakdown.inspectedChildren) of \(breakdown.totalChildren) items. Other folders may be larger.")
-                                .font(.caption).foregroundStyle(.orange)
+                                .font(.caption).foregroundStyle(AppTheme.textMuted)
                         }
                         if breakdown.skippedCount > 0 {
                             Text("\(breakdown.skippedCount) entries were inaccessible, linked, or only partially measured.")
@@ -184,19 +203,17 @@ private struct FindingRow: View {
                 .padding(.leading, 50)
                 .padding(.trailing, 14)
                 .padding(.vertical, 12)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(.opacity)
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.primary.opacity(isSelected ? 0.055 : 0.035))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(isSelected ? AppTheme.accent.opacity(0.6) : AppTheme.border, lineWidth: 1)
-        )
-        .animation(.snappy, value: isExpanded)
-        .animation(.snappy, value: isSelected)
+        .background(isSelected ? AppTheme.accentSubtle : AppTheme.panel)
+        .overlay(alignment: .leading) {
+            if isSelected {
+                Rectangle().fill(AppTheme.accent).frame(width: 3)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.17), value: isExpanded)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.17), value: isSelected)
     }
 
     private var isCleanable: Bool {
@@ -226,8 +243,8 @@ private struct RiskBadge: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(
-            Capsule()
-                .fill(risk.tint.opacity(0.12))
+            RoundedRectangle(cornerRadius: 4)
+                .fill(risk.tint.opacity(0.11))
         )
     }
 }

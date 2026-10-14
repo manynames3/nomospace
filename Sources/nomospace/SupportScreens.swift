@@ -8,12 +8,11 @@ struct HistoryScreen: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Cleanup History")
-                            .font(.system(size: 30, weight: .semibold))
-                        Text("A local record of items moved to Trash from this Mac. This never leaves the device.")
-                            .foregroundStyle(.secondary)
-                    }
+                    EditorialPageHeading(
+                        eyebrow: "LOCAL RECEIPTS  /  HISTORY",
+                        title: "Cleanup history",
+                        subtitle: "A private record of items moved to Trash on this Mac. Not yet freed disk space."
+                    )
                     Spacer()
                     Button("Clear History") {
                         isConfirmingClearHistory = true
@@ -75,12 +74,11 @@ struct TrustGuideScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("How nomospace keeps cleanup safe")
-                        .font(.system(size: 30, weight: .semibold))
-                    Text("The product is designed to explain storage before it removes anything.")
-                        .foregroundStyle(.secondary)
-                }
+                EditorialPageHeading(
+                    eyebrow: "TRUST  /  HOW IT WORKS",
+                    title: "How cleanup stays safe",
+                    subtitle: "Understand the safeguards before you move any item to Trash."
+                )
 
                 VStack(spacing: 12) {
                     GuideCard(
@@ -131,12 +129,11 @@ struct AboutScreen: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("About nomospace")
-                        .font(.system(size: 30, weight: .semibold))
-                    Text("A local-first Mac Storage Auditor for hidden storage that normal cleaners miss.")
-                        .foregroundStyle(.secondary)
-                }
+                EditorialPageHeading(
+                    eyebrow: "PRODUCT  /  INFORMATION",
+                    title: "About NomoSpace",
+                    subtitle: "A local-first storage auditor for the hidden files normal disk tools don't explain."
+                )
 
                 VStack(spacing: 12) {
                     AboutStatusRow(
@@ -265,7 +262,8 @@ private struct SummaryMetricRow: View {
                 Text(title)
                     .foregroundStyle(.secondary)
                 Text(value)
-                    .font(.system(size: 28, weight: .semibold))
+                    .font(.system(size: 31, weight: .medium))
+                    .tracking(-0.7)
                     .monospacedDigit()
                 Text(subtitle)
                     .font(.caption)
@@ -285,7 +283,8 @@ private struct HistoryRow: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(record.reclaimedBytes.storageString)
-                    .font(.headline)
+                    .font(.system(size: 20, weight: .medium))
+                    .monospacedDigit()
                 Text("moved to Trash")
                     .foregroundStyle(.secondary)
                 Spacer()

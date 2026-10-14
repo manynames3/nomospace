@@ -415,4 +415,9 @@ enum VolumeMetrics {
         let keys: Set<URLResourceKey> = [.volumeAvailableCapacityForImportantUsageKey]
         return try? url.resourceValues(forKeys: keys).volumeAvailableCapacityForImportantUsage
     }
+
+    static func totalBytes(at url: URL = FileManager.default.homeDirectoryForCurrentUser) -> Int64? {
+        let keys: Set<URLResourceKey> = [.volumeTotalCapacityKey]
+        return try? url.resourceValues(forKeys: keys).volumeTotalCapacity.map(Int64.init)
+    }
 }
