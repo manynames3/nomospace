@@ -22,7 +22,6 @@ jobs:
           .build/debug/nomospace --export-preview .build/previews
           test -s .build/previews/nomospace-audit.png
           test -s .build/previews/nomospace-findings.png
-          test -s .build/previews/nomospace-safety.png
       - name: Upload preview screenshots
         uses: actions/upload-artifact@v4
         with:

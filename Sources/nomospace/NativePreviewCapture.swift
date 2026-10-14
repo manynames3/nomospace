@@ -26,10 +26,6 @@ enum NativePreviewCapture {
         )
         try exportScreen(
             to: destination.appendingPathComponent("nomospace-findings.png"),
-            viewModel: preview, section: .audit, showTop: false
-        )
-        try exportScreen(
-            to: destination.appendingPathComponent("nomospace-safety.png"),
             viewModel: preview, section: .guide, showTop: true
         )
     }
@@ -41,8 +37,8 @@ enum NativePreviewCapture {
         showTop: Bool
     ) throws {
         let width: CGFloat = 1280
-        let height: CGFloat = 900
-        let display = ContentView(viewModel: viewModel, section: section, previewMode: true)
+        let height: CGFloat = 1120
+        let display = NativePreviewLayout(viewModel: viewModel, section: section)
             .frame(width: width, height: height)
             .environment(\.colorScheme, .light)
             .overlay(alignment: .topTrailing) {

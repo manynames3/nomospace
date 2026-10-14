@@ -803,3 +803,46 @@ private struct ScanIssuesPanel: View {
         .panel()
     }
 }
+
+#if DEBUG
+/// Screenshot composition uses the same production SwiftUI components but
+/// excludes macOS window-managed NavigationSplitView and scrolling, allowing
+/// reproducible, accessible, labeled sample-data captures on CI machines.
+struct NativePreviewLayout: View {
+    @ObservedObject var viewModel: AuditViewModel
+    let section: AppSection
+    @State private var sidebarSelection: AppSection = .audit
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Sidebar(selectedSection: $sidebarSelection)
+                .frame(width: 237)
+                .frame(maxHeight: .infinity)
+                .background(AppTheme.ink)
+
+            VStack(alignment: .leading, spacing: 14) {
+                if section == .audit {
+                    AuditHeader(viewModel: viewModel)
+                    EvaluationModeBanner(viewModel: viewModel)
+                    SummaryGrid(viewModel: viewModel)
+                    FindingsToolbar(viewModel: viewModel)
+                    FindingsList(viewModel: viewModel)
+                } else if section == .guide {
+                    EditorialPageHeading(
+                        eyebrow: "FINDINGS  /  INSPECTION",
+                        title: "Storage findings",
+                        subtitle: "Understand exactly what each app stored, how much it uses, and the cleanup risk."
+                    )
+                    FindingsToolbar(viewModel: viewModel)
+                    FindingsList(viewModel: viewModel)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(25)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(AppTheme.page)
+        }
+        .onAppear { sidebarSelection = section == .guide ? .audit : section }
+    }
+}
+#endif
