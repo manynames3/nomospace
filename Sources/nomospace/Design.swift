@@ -128,21 +128,34 @@ struct BrandSecondaryButtonStyle: ButtonStyle {
     }
 }
 
-/// Abstract N mark. Designed for the app; does not reuse the corporate logo.
+/// The NomoSpace floating-glass strata mark, shared with the website and Dock.
 struct NomospaceMark: View {
     var size: CGFloat = 28
 
+    // SwiftPM processes standalone PNG resources into the bundle root.
+    // Explicit NSImage loading is reliable for non-asset-catalog images
+    // on macOS, whereas Image(name:bundle:) may resolve to an empty image.
+    private static let markImage: NSImage? = {
+        guard let url = Bundle.module.url(
+            forResource: "nomospace-mark", withExtension: "png"
+        ) else { return nil }
+        return NSImage(contentsOf: url)
+    }()
+
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(AppTheme.mint.opacity(0.12))
-            Path { path in
-                path.move(to: CGPoint(x: size * 0.18, y: size * 0.78))
-                path.addLine(to: CGPoint(x: size * 0.18, y: size * 0.22))
-                path.addLine(to: CGPoint(x: size * 0.78, y: size * 0.78))
-                path.addLine(to: CGPoint(x: size * 0.78, y: size * 0.22))
+        Group {
+            if let mark = Self.markImage {
+                Image(nsImage: mark)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+            } else {
+                // Explicit fallback instead of silently disappearing.
+                Image(systemName: "square.stack.3d.up")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(AppTheme.mint)
             }
-            .stroke(AppTheme.mint, style: StrokeStyle(lineWidth: 2.6, lineCap: .square, lineJoin: .round))
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)

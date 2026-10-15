@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"
+ viewBox="83 91 346 317" role="img" aria-label="NomoSpace floating glass storage layers">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+    <stop stop-color="#1a2a2f"/><stop offset=".42" stop-color="#0b1519"/><stop offset="1" stop-color="#050d10"/>
+  </linearGradient>
+  <radialGradient id="groundGlow"><stop stop-color="#82ffe5" stop-opacity=".45"/><stop offset=".32" stop-color="#4fdec1" stop-opacity=".21"/><stop offset="1" stop-color="#3cbea9" stop-opacity="0"/></radialGradient>
+  <radialGradient id="midGlow"><stop stop-color="#b2ffeb" stop-opacity=".75"/><stop offset=".45" stop-color="#5dedc9" stop-opacity=".34"/><stop offset="1" stop-color="#6bdbc3" stop-opacity="0"/></radialGradient>
+  <linearGradient id="glassTop" x1=".08" y1="0" x2=".88" y2="1">
+    <stop stop-color="#d6f0eb" stop-opacity=".66"/><stop offset=".13" stop-color="#5b8888" stop-opacity=".32"/><stop offset=".35" stop-color="#152a2f" stop-opacity=".84"/><stop offset=".57" stop-color="#30474b" stop-opacity=".82"/><stop offset=".79" stop-color="#b5e1d6" stop-opacity=".44"/><stop offset="1" stop-color="#263b42" stop-opacity=".79"/>
+  </linearGradient>
+  <linearGradient id="glassMid" x1=".16" y1="0" x2=".86" y2="1">
+    <stop stop-color="#7ee6d1" stop-opacity=".88"/><stop offset=".31" stop-color="#174849" stop-opacity=".92"/><stop offset=".53" stop-color="#4ecdb6" stop-opacity=".92"/><stop offset=".81" stop-color="#aef8e8" stop-opacity=".85"/><stop offset="1" stop-color="#276d6e"/>
+  </linearGradient>
+  <linearGradient id="glassBottom" x1=".12" y1="0" x2=".79" y2="1">
+    <stop stop-color="#b9e3dc" stop-opacity=".68"/><stop offset=".27" stop-color="#31585a" stop-opacity=".92"/><stop offset=".58" stop-color="#5cb4a5" stop-opacity=".93"/><stop offset=".8" stop-color="#9ff9e4" stop-opacity=".85"/><stop offset="1" stop-color="#233e44"/>
+  </linearGradient>
+  <linearGradient id="edge" x1="0" y1=".13" x2="1" y2=".82">
+    <stop stop-color="#c9e7e2"/><stop offset=".24" stop-color="#7f9e9e"/><stop offset=".47" stop-color="#ddfff7"/><stop offset=".70" stop-color="#70c6b6"/><stop offset="1" stop-color="#e6fff8"/>
+  </linearGradient>
+  <linearGradient id="edgeShade" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#9cead9" stop-opacity=".63"/><stop offset="1" stop-color="#193d43" stop-opacity=".82"/>
+  </linearGradient>
+  <radialGradient id="innerSheen" cx=".44" cy=".61" r=".7"><stop stop-color="#a3fff0" stop-opacity=".37"/><stop offset=".38" stop-color="#8ce3d3" stop-opacity=".08"/><stop offset="1" stop-color="#b8fff4" stop-opacity="0"/></radialGradient>
+  <filter id="blur"><feGaussianBlur stdDeviation="15"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
+  <filter id="drop"><feGaussianBlur stdDeviation="4"/></filter>
+  <path id="plate" d="M119 170 L244 108 Q257 102 269 108 L401 168 Q416 175 403 185 L273 246 Q260 251 247 246 L115 187 Q104 181 119 170 Z"/>
+  <path id="rim" d="M114 183 Q112 188 120 193 L248 253 Q261 260 273 254 L404 193 Q409 191 409 182 L402 187 L272 247 Q258 254 245 248 Z"/>
+</defs>
+<!-- Lower smoked glass stratum, with the exposed mint underside. -->
+<g transform="translate(0 122)">
+  <use href="#plate" transform="translate(0 12)" fill="#0a2e33" opacity=".76" filter="url(#drop)"/>
+  <use href="#rim" fill="url(#edgeShade)"/>
+  <use href="#plate" fill="url(#glassBottom)" stroke="url(#edge)" stroke-width="2.2" stroke-linejoin="round"/>
+  <use href="#plate" fill="url(#innerSheen)" opacity=".92"/>
+  <path d="M120 176 L246 118 M399 176 L275 236" stroke="#edfffa" stroke-opacity=".40" stroke-linecap="round" stroke-width="1.7"/>
+  <path d="M120 188 L250 247 Q260 251 272 247 L402 186" fill="none" stroke="#aaffec" stroke-opacity=".7" stroke-width="2.4"/>
+</g>
+
+<!-- Bright singular discovery: a luminous volume between layers. -->
+<ellipse cx="258" cy="294" rx="118" ry="40" fill="url(#midGlow)" filter="url(#blur)"/>
+<g transform="translate(0 61)">
+  <use href="#plate" transform="translate(0 12)" fill="#092f32" opacity=".7" filter="url(#drop)"/>
+  <use href="#rim" fill="url(#edgeShade)"/>
+  <use href="#plate" fill="url(#glassMid)" stroke="#baffed" stroke-opacity=".93" stroke-width="2.6" stroke-linejoin="round"/>
+  <use href="#plate" fill="url(#innerSheen)"/>
+  <path d="M121 174 L248 114 M400 177 L270 240" stroke="#eefff8" stroke-opacity=".54" stroke-width="2"/>
+  <path d="M122 188 L247 245 Q260 250 273 245 L401 185" stroke="#c3fff2" stroke-opacity=".84" fill="none" stroke-width="3"/>
+</g>
+
+<!-- Top translucent architectural pane: quiet metallic reflections. -->
+<g>
+  <use href="#plate" transform="translate(0 12)" fill="#132a30" opacity=".8" filter="url(#drop)"/>
+  <use href="#rim" fill="url(#edgeShade)" opacity=".85"/>
+  <use href="#plate" fill="url(#glassTop)" stroke="url(#edge)" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M125 170 L246 115 Q259 111 269 115 L395 173" fill="none" stroke="#f0fffb" stroke-opacity=".59" stroke-width="2.2"/>
+  <path d="M120 185 L247 242 Q260 250 274 243 L403 184" fill="none" stroke="#e1fff6" stroke-opacity=".82" stroke-width="2.7"/>
+  <path d="M147 177 L250 129 Q257 126 266 129 L365 175 L266 221 Q258 225 251 221 Z" fill="#c0fff0" opacity=".058"/>
+</g>
+
+
+</svg>

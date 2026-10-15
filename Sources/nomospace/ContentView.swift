@@ -70,9 +70,10 @@ private struct Sidebar: View {
             HStack(spacing: 11) {
                 NomospaceMark(size: 35)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("nomospace")
-                        .font(.system(size: 19, weight: .semibold))
-                        .tracking(-0.6)
+                    (Text("Nomo").fontWeight(.semibold)
+                        + Text("Space").fontWeight(.regular))
+                        .font(.system(size: 19))
+                        .tracking(-0.7)
                         .foregroundStyle(AppTheme.onDark)
                     Text("STORAGE INTELLIGENCE")
                         .font(.system(size: 9, weight: .medium, design: .monospaced))
