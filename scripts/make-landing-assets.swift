@@ -8,32 +8,17 @@ let assetsURL = rootURL
 
 try FileManager.default.createDirectory(at: assetsURL, withIntermediateDirectories: true)
 
-try renderIcon(size: 512).pngData().write(to: assetsURL.appendingPathComponent("nomospace-icon.png"))
+// The icon is not a separate marketing illustration: it is exactly the
+// approved native app master, preventing blue-icon regressions.
+let brandMaster = rootURL.appendingPathComponent("branding/nomospace-glass.png")
+let marketingIcon = assetsURL.appendingPathComponent("nomospace-icon.png")
+try? FileManager.default.removeItem(at: marketingIcon)
+try FileManager.default.copyItem(at: brandMaster, to: marketingIcon)
 try renderHeroPreview(width: 1800, height: 1120).pngData().write(to: assetsURL.appendingPathComponent("nomospace-hero-preview.png"))
 try renderReportPreview(width: 1200, height: 840).pngData().write(to: assetsURL.appendingPathComponent("nomospace-report-preview.png"))
 
 print(assetsURL.path)
 
-private func renderIcon(size: Int) -> NSImage {
-    let image = NSImage(size: NSSize(width: size, height: size))
-    image.lockFocus()
-
-    let rect = NSRect(x: 0, y: 0, width: size, height: size)
-    let background = NSBezierPath(
-        roundedRect: rect.insetBy(dx: CGFloat(size) * 0.04, dy: CGFloat(size) * 0.04),
-        xRadius: CGFloat(size) * 0.22,
-        yRadius: CGFloat(size) * 0.22
-    )
-    NSGradient(colors: [
-        NSColor(calibratedRed: 0.06, green: 0.22, blue: 0.58, alpha: 1),
-        NSColor(calibratedRed: 0.05, green: 0.48, blue: 0.43, alpha: 1)
-    ])?.draw(in: background, angle: 135)
-
-    drawText("n", in: NSRect(x: 0, y: CGFloat(size) * 0.1, width: CGFloat(size), height: CGFloat(size) * 0.75), size: CGFloat(size) * 0.44, weight: .semibold, color: .white, alignment: .center)
-
-    image.unlockFocus()
-    return image
-}
 
 private func renderHeroPreview(width: Int, height: Int) -> NSImage {
     let image = NSImage(size: NSSize(width: width, height: height))

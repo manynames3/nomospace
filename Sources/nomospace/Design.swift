@@ -128,24 +128,17 @@ struct BrandSecondaryButtonStyle: ButtonStyle {
     }
 }
 
-/// Abstract N mark. Designed for the app; does not reuse the corporate logo.
+/// The NomoSpace floating-glass strata mark, shared with the website and Dock.
 struct NomospaceMark: View {
     var size: CGFloat = 28
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 4)
-                .fill(AppTheme.mint.opacity(0.12))
-            Path { path in
-                path.move(to: CGPoint(x: size * 0.18, y: size * 0.78))
-                path.addLine(to: CGPoint(x: size * 0.18, y: size * 0.22))
-                path.addLine(to: CGPoint(x: size * 0.78, y: size * 0.78))
-                path.addLine(to: CGPoint(x: size * 0.78, y: size * 0.22))
-            }
-            .stroke(AppTheme.mint, style: StrokeStyle(lineWidth: 2.6, lineCap: .square, lineJoin: .round))
-        }
-        .frame(width: size, height: size)
-        .accessibilityHidden(true)
+        Image("nomospace-mark", bundle: .module)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .accessibilityHidden(true)
     }
 }
 

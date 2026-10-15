@@ -79,16 +79,24 @@ img {
 .brand-mark {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  color: #0c1518;
-  background: linear-gradient(135deg, var(--gold), var(--blue));
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+}
+.brand-mark img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
   border-radius: 10px;
-  font-weight: 900;
 }
 
 .brand-name {
-  font-size: 18px;
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: -0.7px;
+}
+.brand-name strong {
+  font-weight: 650;
 }
 
 .site-header nav {

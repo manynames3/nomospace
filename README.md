@@ -1,4 +1,6 @@
-# nomospace
+# NomoSpace
+
+<img src="landing/assets/nomospace-icon.png" width="110" alt="NomoSpace glass-layer app icon" />
 
 **Know where your space goes.**
 

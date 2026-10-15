@@ -16,6 +16,7 @@ swift build
 plutil -lint Packaging/Info.plist >/dev/null
 python3 -m json.tool Sources/nomospace/Resources/Rules/storage-rules.json >/dev/null
 python3 Tests/test_rules.py
+python3 Tests/test_brand_assets.py
 test -f Packaging/nomospace.icns
 test -f landing/index.html
 test -f landing/styles.css
