@@ -132,13 +132,33 @@ struct BrandSecondaryButtonStyle: ButtonStyle {
 struct NomospaceMark: View {
     var size: CGFloat = 28
 
+    // SwiftPM processes standalone PNG resources into the bundle root.
+    // Explicit NSImage loading is reliable for non-asset-catalog images
+    // on macOS, whereas Image(name:bundle:) may resolve to an empty image.
+    private static let markImage: NSImage? = {
+        guard let url = Bundle.module.url(
+            forResource: "nomospace-mark", withExtension: "png"
+        ) else { return nil }
+        return NSImage(contentsOf: url)
+    }()
+
     var body: some View {
-        Image("nomospace-mark", bundle: .module)
-            .resizable()
-            .interpolation(.high)
-            .scaledToFit()
-            .frame(width: size, height: size)
-            .accessibilityHidden(true)
+        Group {
+            if let mark = Self.markImage {
+                Image(nsImage: mark)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+            } else {
+                // Explicit fallback instead of silently disappearing.
+                Image(systemName: "square.stack.3d.up")
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundStyle(AppTheme.mint)
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
     }
 }
 

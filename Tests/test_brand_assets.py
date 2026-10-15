@@ -28,7 +28,7 @@ assert '<strong>Nomo</strong>Space' in html
 assert '<span class="brand-mark">n</span>' not in html
 
 code = Path("Sources/nomospace/Design.swift").read_text()
-assert 'Image("nomospace-mark", bundle: .module)' in code
+assert 'Bundle.module.url(' in code and '"nomospace-mark"' in code
 assert "Abstract N mark" not in code
 
 print("NomoSpace brand validation passed: app ICNS, master, native mark, site/favicon, wordmark")
