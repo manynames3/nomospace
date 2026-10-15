@@ -20,7 +20,7 @@ These images are captures of NomoSpace's **native SwiftUI components**, with cle
 
 ## Download and status
 
-- **Current Mac beta (v0.2.0):** [Download NomoSpace evaluation ZIP](https://github.com/manynames3/nomospace/releases/download/v0.2.0-beta.1/nomospace-evaluation.zip).
+- **Current Mac beta (v0.2.1):** [Download NomoSpace evaluation ZIP](https://github.com/manynames3/nomospace/releases/download/v0.2.1-beta.1/nomospace-evaluation.zip).
 - **Platform:** macOS 14+, native SwiftUI, local-first.
 - **Signing:** This is an **ad-hoc signed, unnotarized beta** for authorized testing, not a notarized public production release. macOS Gatekeeper may block it.
 - **Website:** [nomospace.pages.dev](https://nomospace.pages.dev).
